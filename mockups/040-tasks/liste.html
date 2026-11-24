@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasks – Listen · ManagementBuddy</title><link rel="stylesheet" href="_palette.css">
+  <style>
+    .toolbar { display:flex; align-items:center; gap:10px; margin:0 0 21px; }
+    .search { flex:1; max-width:360px; height:40px; display:flex; gap:10px; align-items:center; padding:0 13px; border:1px solid #dedce7; background:#fff; border-radius:8px; color:var(--mud-text-secondary); }
+    .list-stack { display:grid; gap:16px; }
+    .list-card { overflow:hidden; }
+    .list-head { display:flex; align-items:center; justify-content:space-between; padding:17px 20px; border-bottom:1px solid var(--mud-divider); }
+    .list-title-wrap { display:flex; align-items:center; gap:12px; }
+    .list-bullet { width:10px;height:10px;border-radius:50%;background:var(--mud-primary); }
+    .list-name { font-size:17px; font-weight:650; }
+    .list-count { color:var(--mud-text-secondary); font-size:var(--text-xs); margin-left:3px; }
+    .task-row { min-height:58px; display:grid; grid-template-columns:28px minmax(150px,1fr) 145px 112px 34px; align-items:center; gap:12px; padding:9px 20px; border-bottom:1px solid #f0eff4; }
+    .task-row:last-of-type { border-bottom:0; }
+    .task-title-area { min-width:0; }
+    .task-name { font-weight:500; }
+    .subtask-preview { display:grid; gap:3px; margin:6px 0 1px 12px; padding-left:10px; border-left:2px solid var(--mud-primary-soft); }
+    .subtask-line { display:flex; align-items:center; gap:7px; min-height:19px; color:var(--mud-text-secondary); font-size:var(--text-xs); }
+    .subtask-line .check { width:13px; height:13px; border-width:1px; border-radius:3px; font-size:9px; }
+    .subtask-chevron { display:inline-grid; place-items:center; width:16px; height:16px; margin-left:auto; border:0; background:transparent; color:var(--mud-primary); font-size:14px; }
+    .task-name.done-text { color:var(--mud-text-disabled); text-decoration:line-through; }
+    .task-meta { font-size:var(--text-xs); color:var(--mud-text-secondary); }
+    .due { justify-self:start; }
+    .add-task { padding:12px 20px; color:var(--mud-primary); font-weight:600; font-size:var(--text-sm); border-top:1px solid var(--mud-divider); }
+    .empty-error { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; }
+    .state-card { padding:19px 21px; display:flex; gap:14px; align-items:flex-start; }
+    .state-icon { width:34px;height:34px; flex:none; display:grid;place-items:center;border-radius:50%;background:#f4f3f8;color:#817d91;font-weight:700; }
+    .state-card h3 { font-size:14px; margin:1px 0 5px; }
+    .state-card p { color:var(--mud-text-secondary); font-size:var(--text-xs); line-height:1.5; margin:0; }
+    @media(max-width:700px){.task-row{grid-template-columns:25px minmax(110px,1fr) 100px 32px;gap:7px;padding:9px 12px}.task-row .task-meta{display:none}.list-head{padding:14px}.add-task{padding:12px 14px}.empty-error{grid-template-columns:1fr}.toolbar .btn{padding:8px 10px}}
+  </style>
+</head>
+<body>
+  <header class="appbar"><div class="brand-mark">M</div><div class="brand">ManagementBuddy</div><div class="crumb">Tasks / Listen</div><div class="appbar-spacer"></div><div class="avatar">SB</div></header>
+  <div class="shell"><aside class="drawer"><div class="workspace">Workspace · Acme GmbH</div><div class="nav-item"><span class="nav-icon">⌂</span>Übersicht</div><div class="nav-item"><span class="nav-icon">▤</span>Projekte</div><div class="nav-item active"><span class="nav-icon">☑</span>Tasks</div><div class="nav-item"><span class="nav-icon">◷</span>Erinnerungen</div><div class="drawer-label">Tasks</div><div class="nav-item active"><span class="nav-icon">☷</span>Listen</div><div class="nav-item"><span class="nav-icon">▥</span>Board</div></aside>
+    <main class="main">
+      <div class="page-head"><div><div class="eyebrow">Aufgaben organisieren</div><h1>Meine Tasks</h1><p class="subhead">Deine Listen und anstehenden Aufgaben an einem Ort.</p></div><div class="actions"><button class="btn btn-outlined">▥&nbsp; Board</button><button class="btn btn-primary">＋&nbsp; Neue Liste</button></div></div>
+      <div class="toolbar"><div class="search"><span>⌕</span><span>Tasks durchsuchen</span></div><span class="chip chip-purple">Alle Listen</span><button class="icon-btn" aria-label="Weitere Filter">☷</button></div>
+      <section class="list-stack" aria-label="Task-Listen">
+        <article class="surface list-card"><header class="list-head"><div class="list-title-wrap"><span class="list-bullet"></span><span class="list-name">Website-Relaunch</span><span class="list-count">· 3 Tasks</span></div><button class="icon-btn">•••</button></header>
+          <div class="task-row"><span class="check" aria-label="Nicht erledigt"></span><div class="task-title-area"><span class="task-name">Wireframes finalisieren</span><div class="subtask-preview" aria-label="Subtasks"><div class="subtask-line"><span class="check done">✓</span>Startseite und Navigation skizzieren</div><div class="subtask-line"><span class="check"></span>Feedback der Stakeholder einarbeiten <button class="subtask-chevron" aria-label="Subtask-Details öffnen">›</button></div></div></div><span class="task-meta">In Bearbeitung</span><span class="chip chip-red due">Heute fällig</span><button class="icon-btn">•••</button></div>
+          <div class="task-row"><span class="check" aria-label="Nicht erledigt"></span><div class="task-title-area"><span class="task-name">Inhalte vom Kunden einholen</span><div class="subtask-preview" aria-label="Subtasks"><div class="subtask-line"><span class="check"></span>Texte anfordern <button class="subtask-chevron" aria-label="Subtask-Details öffnen">›</button></div></div></div><span class="task-meta">To-do</span><span class="chip chip-amber due">Morgen</span><button class="icon-btn">•••</button></div>
+          <div class="task-row"><span class="check done" aria-label="Erledigt">✓</span><div class="task-title-area"><span class="task-name done-text">Kick-off vorbereiten</span></div><span class="task-meta">Abgeschlossen</span><span class="task-meta">Erledigt</span><button class="icon-btn">•••</button></div>
+          <div class="add-task">＋ Task hinzufügen</div>
+        </article>
+        <article class="surface list-card"><header class="list-head"><div class="list-title-wrap"><span class="list-bullet" style="background:#00a6a6"></span><span class="list-name">Persönlich</span><span class="list-count">· 2 Tasks</span></div><button class="icon-btn">•••</button></header>
+          <div class="task-row"><span class="check"></span><span class="task-name">Quartalsziele überprüfen</span><span class="task-meta">To-do</span><span class="chip chip-blue due">12. Nov.</span><button class="icon-btn">•••</button></div>
+          <div class="task-row"><span class="check"></span><span class="task-name">Team-Feedback vorbereiten</span><span class="task-meta">To-do</span><span class="task-meta">Kein Termin</span><button class="icon-btn">•••</button></div>
+          <div class="add-task">＋ Task hinzufügen</div>
+        </article>
+      </section>
+      <section class="empty-error" aria-label="Kantenzustände">
+        <article class="surface state-card"><div class="state-icon">☷</div><div><h3>Leere Liste</h3><p>Noch keine Tasks in dieser Liste. Über „Task hinzufügen“ startest du deine Planung.</p></div></article>
+        <article class="surface state-card"><div class="state-icon" style="background:var(--mud-error-soft);color:var(--mud-error)">!</div><div><h3>Listen konnten nicht geladen werden</h3><p>Verbindung zum Server fehlgeschlagen. Tasks bleiben unverändert, bis du es erneut versuchst. <b style="color:var(--mud-primary)">Erneut versuchen</b></p></div></article>
+      </section>
+       <aside class="annotation"><strong>Screen-Annotationen</strong><p><b>Interaktion:</b> Listen-Kopf klappt die Task-Zeilen ein/aus; Task- und eingerückte Subtask-Checkboxen aktualisieren isDone; Chevron öffnet die ausführliche Subtask-Interaktion im Task-Detaildialog. Fälligkeits-Badge zeigt dueDateUtc; „＋ Task hinzufügen“ öffnet den Erstellungsdialog. Suche und Listenmenü sind visuelle Platzhalter.</p><p><b>Künftige MudBlazor-Komponenten:</b> MudCard je TaskList, MudList/MudListItem samt eingerückten Subtask-Zeilen, MudCheckBox, MudChip, MudIconButton und MudTextField.</p><p><b>Kantenzustände:</b> Leere Liste und Ladefehler sind exemplarisch unten dargestellt. Tasks ohne Subtasks zeigen keine Unterzeilen. Abgelaufene/veraltete Erinnerungen erhalten im Detaildialog einen eigenen Warnhinweis; kein Fälligkeitsdatum wird als „Kein Termin“ gezeigt.</p><p><b>Farbtokens:</b> Primärfarbe #2c6cbf mit kontrastreichen dunklen/hellen Ableitungen in Kopfzeile, Aktionen und aktiver Navigation.</p></aside>
+    </main></div>
+</body>
+</html>

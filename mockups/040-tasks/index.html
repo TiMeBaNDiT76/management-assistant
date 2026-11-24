@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasks · ManagementBuddy Mockups 0.4.0</title><link rel="stylesheet" href="_palette.css">
+  <style>
+    .intro { max-width:740px; margin:0 0 30px; color:var(--mud-text-secondary); font-size:var(--text-md); line-height:1.65; }
+    .tile-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+    .tile { padding:22px; transition:transform .15s ease, box-shadow .15s ease; }
+    .tile:hover { transform:translateY(-2px); box-shadow:0 7px 18px #231f4615; }
+    .tile-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:19px; }
+    .tile-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:12px; background:var(--mud-primary-soft); color:var(--mud-primary); font-size:21px; }
+    .tile-index { color:#aaa7b7; font-weight:700; font-size:var(--text-xs); }
+    .tile h2 { font-size:18px; margin-bottom:8px; }
+    .tile p { min-height:45px; margin:0; color:var(--mud-text-secondary); line-height:1.55; }
+    .tile-link { display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--mud-divider); padding-top:15px; margin-top:20px; color:var(--mud-primary); font-weight:650; }
+    .version { display:inline-flex; margin-top:26px; padding:7px 12px; background:#fff; border:1px solid var(--mud-divider); border-radius:20px; color:var(--mud-text-secondary); font-size:var(--text-xs); }
+    @media(max-width:900px){.tile-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:580px){.tile-grid{grid-template-columns:1fr}.tile p{min-height:0}}
+  </style>
+</head>
+<body>
+  <header class="appbar"><div class="brand-mark">M</div><div class="brand">ManagementBuddy</div><div class="crumb">Mockups / Tasks</div><div class="appbar-spacer"></div><div class="avatar">SB</div></header>
+  <div class="shell">
+    <aside class="drawer"><div class="workspace">Workspace · Acme GmbH</div><div class="nav-item"><span class="nav-icon">⌂</span>Übersicht</div><div class="nav-item"><span class="nav-icon">▤</span>Projekte</div><div class="nav-item active"><span class="nav-icon">☑</span>Tasks</div><div class="nav-item"><span class="nav-icon">◷</span>Erinnerungen</div><div class="drawer-label">Arbeitsbereich</div><div class="nav-item"><span class="nav-icon">⚙</span>Einstellungen</div></aside>
+    <main class="main">
+      <div class="page-head"><div><div class="eyebrow">Milestone 0.4.0</div><h1>Tasks-Modul</h1><p class="subhead">Mockup-Übersicht · Listen, Kanban-Board und Task-Details</p></div><span class="chip chip-purple">REST · TaskItem / TaskList</span></div>
+      <p class="intro">Drei Ansichten für die tägliche Aufgabenarbeit. Die Screens verwenden die Task- und Listenfelder aus dem REST-Vertrag und zeigen bewusst den MudBlazor-Look des bestehenden ManagementBuddy-Shells.</p>
+      <section class="tile-grid" aria-label="Mockup Screens">
+        <a class="tile surface" href="liste.html"><div class="tile-top"><span class="tile-icon">☷</span><span class="tile-index">SCREEN 01</span></div><h2>Listenansicht</h2><p>Listen als Karten, Tasks mit sichtbaren Subtask-Unterzeilen, Erledigungsstatus und Fälligkeits-Badges.</p><div class="tile-link"><span>Ansicht öffnen</span><span>→</span></div></a>
+        <a class="tile surface" href="board.html"><div class="tile-top"><span class="tile-icon">▥</span><span class="tile-index">SCREEN 02</span></div><h2>Kanban-Board</h2><p>Todo, In Progress und Done mit Subtask-Markern, Fortschritt je Task sowie SortableJS-Platzhaltern.</p><div class="tile-link"><span>Ansicht öffnen</span><span>→</span></div></a>
+        <a class="tile surface" href="task-details.html"><div class="tile-top"><span class="tile-icon">▧</span><span class="tile-index">SCREEN 03</span></div><h2>Task-Details</h2><p>Dialogentwurf für Notizen, Status, Subtasks, Fälligkeit, Erinnerungen und Labels.</p><div class="tile-link"><span>Ansicht öffnen</span><span>→</span></div></a>
+      </section>
+      <div class="version">UI-Sprache: Deutsch <span style="margin:0 8px">·</span> Primärfarbe: #2c6cbf</div>
+      <aside class="annotation"><strong>Mockup-Hinweis</strong><p><b>Interaktion:</b> Kacheln öffnen die jeweiligen statischen HTML-Screens; Buttons und Controls sind visuelle Prototypen.</p><p><b>Künftige MudBlazor-Komponenten:</b> MudCard, MudButton, MudChip, MudDrawer und MudAppBar.</p><p><b>Kantenzustände:</b> Detailansichten enthalten gesonderte Hinweise zu leeren Listen, API-Fehlern und veralteten Erinnerungen.</p><p><b>Farbtokens:</b> Einheitliche Primärfarbe #2c6cbf und hell/dunkel abgeleitete Akzente in allen Screens.</p></aside>
+    </main>
+  </div>
+</body>
+</html>

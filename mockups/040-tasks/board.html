@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasks – Board · ManagementBuddy</title><link rel="stylesheet" href="_palette.css">
+  <style>
+    .board-tools { display:flex; align-items:center; gap:10px; margin-bottom:19px; }
+    .select-like { display:flex; align-items:center; justify-content:space-between; gap:20px; min-width:205px; padding:10px 13px; border:1px solid #dedce7; border-radius:8px; background:#fff; color:var(--mud-text); }
+    .board-hint { color:var(--mud-text-secondary); font-size:var(--text-xs); margin-left:auto; }
+    .board { display:grid; grid-template-columns:repeat(3,minmax(220px,1fr)); gap:16px; align-items:start; }
+    .column { border-radius:var(--mud-radius-lg); background:#edf2f8; padding:12px; min-height:470px; }
+    .column-head { display:flex; align-items:center; justify-content:space-between; padding:4px 4px 13px; }
+    .column-title { display:flex; align-items:center; gap:9px; font-weight:700; }
+    .column-dot { width:9px;height:9px;border-radius:50%;background:#8c89a0; }
+    .column-count { min-width:22px; padding:3px 7px; border-radius:12px; background:#fff; color:var(--mud-text-secondary); font-size:var(--text-xs); text-align:center; }
+    .kanban-card { padding:15px; margin:0 0 10px; box-shadow:0 1px 5px #231f4610; }
+    .card-tags { display:flex; gap:6px; margin-bottom:10px; }
+    .label { font-size:10px; letter-spacing:.03em; font-weight:700; text-transform:uppercase; color:var(--mud-primary); background:var(--mud-primary-soft); padding:4px 7px; border-radius:4px; }
+    .kanban-card h3 { font-size:14px; line-height:1.45; margin:0 0 13px; font-weight:650; }
+    .progress-row { display:flex; align-items:center; justify-content:space-between; margin:0 0 7px; color:var(--mud-text-secondary); font-size:11px; }
+    .progress { height:5px; border-radius:5px; background:#ecebf1; overflow:hidden; margin-bottom:12px; }
+    .progress span { display:block; height:100%; background:var(--mud-primary); border-radius:5px; }
+    .subtask-toggle { display:inline-flex; align-items:center; gap:8px; padding:0; border:0; background:transparent; color:var(--mud-text-secondary); font:inherit; cursor:pointer; }
+    .subtask-markers { display:inline-flex; gap:3px; color:var(--mud-primary-dark); font-weight:800; letter-spacing:.06em; }
+    .subtask-markers .pending { color:var(--mud-text-disabled); }
+    .card-foot { display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f0eff4; padding-top:10px; }
+    .due { font-size:11px; padding:4px 8px; }
+    .initials { width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:var(--mud-primary-soft);color:var(--mud-primary-dark);font-size:10px;font-weight:700; }
+    .add-card { text-align:center; padding:10px; color:var(--mud-text-secondary); font-size:var(--text-sm); }
+    .sortable { margin:16px 0 0; padding:11px 14px; border-radius:8px; background:var(--mud-primary-soft); color:#40536c; font-size:var(--text-xs); }
+    .sortable b { color:var(--mud-primary-dark); }
+    @media(max-width:850px){.board{grid-template-columns:1fr;}.column{min-height:0}.board-hint{display:none}}
+  </style>
+</head>
+<body>
+  <header class="appbar"><div class="brand-mark">M</div><div class="brand">ManagementBuddy</div><div class="crumb">Tasks / Board</div><div class="appbar-spacer"></div><div class="avatar">SB</div></header>
+  <div class="shell"><aside class="drawer"><div class="workspace">Workspace · Acme GmbH</div><div class="nav-item"><span class="nav-icon">⌂</span>Übersicht</div><div class="nav-item"><span class="nav-icon">▤</span>Projekte</div><div class="nav-item active"><span class="nav-icon">☑</span>Tasks</div><div class="nav-item"><span class="nav-icon">◷</span>Erinnerungen</div><div class="drawer-label">Tasks</div><div class="nav-item"><span class="nav-icon">☷</span>Listen</div><div class="nav-item active"><span class="nav-icon">▥</span>Board</div></aside>
+    <main class="main">
+      <div class="page-head"><div><div class="eyebrow">Aufgaben organisieren</div><h1>Task-Board</h1><p class="subhead">Verschaffe dir einen Überblick über den Fortschritt.</p></div><div class="actions"><button class="btn btn-outlined">☷&nbsp; Listenansicht</button><button class="btn btn-primary">＋&nbsp; Task erstellen</button></div></div>
+      <div class="board-tools"><div class="select-like"><span>Website-Relaunch</span><span class="muted">⌄</span></div><span class="chip chip-purple">Alle Tasks</span><span class="board-hint">Ziehe Tasks zwischen Status-Spalten</span></div>
+      <section class="board" aria-label="Kanban Board">
+        <div class="column"><div class="column-head"><div class="column-title"><span class="column-dot"></span>Todo <span class="column-count">2</span></div><button class="icon-btn">＋</button></div>
+          <article class="surface kanban-card"><div class="card-tags"><span class="label">Design</span></div><h3>Inhalte vom Kunden einholen</h3><div class="progress-row"><button class="subtask-toggle" aria-label="Subtasks anzeigen"><span>Subtasks</span><span class="subtask-markers"><span>✓</span><span class="pending">✗</span><span class="pending">✗</span></span></button><span>1 / 3</span></div><div class="progress"><span style="width:33%"></span></div><div class="card-foot"><span class="chip chip-amber due">◷ Morgen</span><span class="initials">ML</span></div></article>
+          <article class="surface kanban-card"><div class="card-tags"><span class="label" style="background:#e1f5fe;color:#006b9e">Planung</span></div><h3>Review-Termin mit Stakeholdern planen</h3><div class="progress-row"><button class="subtask-toggle" aria-label="Subtasks anzeigen"><span>Subtasks</span><span class="subtask-markers"><span class="pending">✗</span><span class="pending">✗</span></span></button><span>0 / 2</span></div><div class="progress"><span style="width:0%"></span></div><div class="card-foot"><span class="chip chip-blue due">◷ 14. Nov.</span><span class="initials">SB</span></div></article>
+          <div class="add-card">＋ Task hinzufügen</div>
+        </div>
+        <div class="column"><div class="column-head"><div class="column-title"><span class="column-dot" style="background:var(--mud-primary)"></span>In Progress <span class="column-count">2</span></div><button class="icon-btn">＋</button></div>
+          <article class="surface kanban-card"><div class="card-tags"><span class="label">Design</span><span class="label" style="background:#fff4d6;color:#8a5b00">Priorität</span></div><h3>Wireframes finalisieren</h3><div class="progress-row"><button class="subtask-toggle" aria-label="Subtasks anzeigen"><span>Subtasks</span><span class="subtask-markers"><span>✓</span><span>✓</span><span class="pending">✗</span><span class="pending">✗</span></span></button><span>2 / 4</span></div><div class="progress"><span style="width:50%"></span></div><div class="card-foot"><span class="chip chip-red due">◷ Heute fällig</span><span class="initials">SB</span></div></article>
+          <article class="surface kanban-card"><div class="card-tags"><span class="label" style="background:#e1f5fe;color:#006b9e">Entwicklung</span></div><h3>Komponentenbibliothek aufsetzen</h3><div class="progress-row"><button class="subtask-toggle" aria-label="Subtasks anzeigen"><span>Subtasks</span><span class="subtask-markers"><span>✓</span><span>✓</span><span>✓</span><span class="pending">✗</span><span class="pending">✗</span></span></button><span>3 / 5</span></div><div class="progress"><span style="width:60%"></span></div><div class="card-foot"><span class="chip chip-blue due">◷ 18. Nov.</span><span class="initials">AK</span></div></article>
+          <div class="add-card">＋ Task hinzufügen</div>
+        </div>
+        <div class="column"><div class="column-head"><div class="column-title"><span class="column-dot" style="background:var(--mud-success)"></span>Done <span class="column-count">1</span></div><button class="icon-btn">＋</button></div>
+          <article class="surface kanban-card"><div class="card-tags"><span class="label">Planung</span></div><h3>Kick-off vorbereiten</h3><div class="progress-row"><button class="subtask-toggle" aria-label="Subtasks anzeigen"><span>Subtasks</span><span class="subtask-markers"><span>✓</span><span>✓</span><span>✓</span></span></button><span>3 / 3</span></div><div class="progress"><span style="width:100%;background:var(--mud-success)"></span></div><div class="card-foot"><span class="chip chip-green due">✓ Erledigt</span><span class="initials">SB</span></div></article>
+          <div class="add-card">＋ Task hinzufügen</div>
+        </div>
+      </section>
+      <div class="sortable"><b>Drag-and-drop-Hinweis:</b> Karten lassen sich im finalen UI per SortableJS zwischen Todo / In Progress / Done verschieben. Position und Status werden an den Task-Endpunkt geschrieben. Dieser HTML-Prototyp ist statisch.</div>
+       <aside class="annotation"><strong>Screen-Annotationen</strong><p><b>Interaktion:</b> Status-Spalten repräsentieren TaskItem.status; Kartenziehen aktualisiert Status und position. Karte öffnet Task-Details, Plus fügt einen Task in der jeweiligen TaskList hinzu. Klickbare Subtask-Marker zeigen erledigte/nicht erledigte subtasks[].isDone samt Fortschrittsbalken; Task-Details bieten Bearbeitung.</p><p><b>Künftige MudBlazor-Komponenten:</b> MudDropContainer / MudDropZone (mit SortableJS-Integration), MudCard, MudProgressLinear, MudChip, MudSelect und MudIconButton für die Subtask-Aktion.</p><p><b>Kantenzustände:</b> Leere Spalte zeigt „Noch keine Tasks“ samt Hinzufügen-Aktion; Tasks ohne Subtasks zeigen keinen Fortschrittsbalken und keine Marker. Fehler beim Speichern sollte Karte im bisherigen Status belassen und eine Snackbar anbieten. Veraltete Reminder werden an der Karte als Warn-Badge gekennzeichnet.</p><p><b>Farbtokens:</b> Primärfarbe #2c6cbf wird für Appbar, Statusakzent und Subtask-Fortschritt verwendet; Textkontrast bleibt über dunkle/helle Primärableitungen erhalten.</p></aside>
+    </main></div>
+</body>
+</html>
