@@ -14,6 +14,8 @@ interface TextFieldProps {
   /** Read-only display for immutable values (e.g. the location key after creation). */
   locked?: boolean;
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  /** Keyboard hint, e.g. "email-address" for contact fields. */
+  keyboardType?: "default" | "email-address" | "number-pad" | "decimal-pad";
   testID?: string;
 }
 
@@ -29,6 +31,7 @@ export function TextField({
   required = false,
   locked = false,
   autoCapitalize = "none",
+  keyboardType,
   testID = "text-field",
 }: TextFieldProps) {
   return (
@@ -52,6 +55,7 @@ export function TextField({
         numberOfLines={multiline ? 3 : undefined}
         editable={!locked}
         autoCapitalize={autoCapitalize}
+        keyboardType={keyboardType}
         testID={testID}
       />
       {caption ? (

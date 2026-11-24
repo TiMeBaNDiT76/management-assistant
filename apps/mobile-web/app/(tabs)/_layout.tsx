@@ -55,7 +55,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="people"
+        name="people/index"
         options={{
           title: "Menschen",
           tabBarIcon: ({ color, size }) => (
@@ -91,6 +91,7 @@ export default function TabsLayout() {
         }}
       />
       {/* Category editors render inside the shell but are not tab buttons. */}
+      <Tabs.Screen name="people/[id]" options={{ href: null }} />
       <Tabs.Screen name="stammdaten/rollen" options={{ href: null }} />
       <Tabs.Screen name="stammdaten/abteilungen" options={{ href: null }} />
       <Tabs.Screen name="stammdaten/beziehungstypen" options={{ href: null }} />

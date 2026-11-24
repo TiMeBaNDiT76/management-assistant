@@ -14,18 +14,24 @@ const TONE_STYLES: Record<ChipTone, { bg: string; text: string }> = {
 interface StatusChipProps {
   label: string;
   tone?: ChipTone;
+  /** Master-data color (`#RRGGBB`) overriding the tone — e.g. Einsatzstandorte. */
+  color?: string;
 }
 
 /** Small pill label used for statuses, moods and locations. */
-export function StatusChip({ label, tone = "primary" }: StatusChipProps) {
+export function StatusChip({ label, tone = "primary", color }: StatusChipProps) {
   const toneStyle = TONE_STYLES[tone];
   return (
     <View
       className="rounded-full px-2.5 py-1"
-      style={{ backgroundColor: toneStyle.bg }}
+      style={{
+        backgroundColor: color ? `${color}1F` : toneStyle.bg,
+        borderWidth: color ? 1 : 0,
+        borderColor: color ? `${color}59` : undefined,
+      }}
       accessibilityRole="text"
     >
-      <Text className="text-xs font-semibold" style={{ color: toneStyle.text }}>
+      <Text className="text-xs font-semibold" style={{ color: color ?? toneStyle.text }}>
         {label}
       </Text>
     </View>

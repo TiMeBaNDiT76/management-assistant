@@ -14,6 +14,10 @@ interface EditorHeaderProps {
   /** e.g. "＋ Rolle anlegen" */
   createLabel?: string;
   onCreate?: () => void;
+  /** e.g. "Bearbeiten" — primary action of a detail page. */
+  actionLabel?: string;
+  onAction?: () => void;
+  actionTestID?: string;
 }
 
 /** Editor page header with back navigation, matching the mockup page-head. */
@@ -24,6 +28,9 @@ export function EditorHeader({
   countChip,
   createLabel,
   onCreate,
+  actionLabel,
+  onAction,
+  actionTestID = "editor-action",
 }: EditorHeaderProps) {
   const router = useRouter();
   return (
@@ -54,6 +61,19 @@ export function EditorHeader({
         </View>
         <View className="items-end" style={{ gap: 8 }}>
           {countChip ? <StatusChip label={countChip} /> : null}
+          {actionLabel && onAction ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={onAction}
+              className="rounded-mud px-3.5 py-2"
+              style={{ backgroundColor: colors.primary.DEFAULT }}
+              testID={actionTestID}
+            >
+              <Text className="text-sm font-semibold" style={{ color: "#FFFFFF" }}>
+                {actionLabel}
+              </Text>
+            </Pressable>
+          ) : null}
           {createLabel && onCreate ? (
             <Pressable
               accessibilityRole="button"
