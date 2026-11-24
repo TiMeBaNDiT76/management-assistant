@@ -7,6 +7,8 @@ import { ConversationRepository } from "../modules/conversations/repository";
 import { ConversationService } from "../modules/conversations/service";
 import { EmployeeRepository } from "../modules/employees/repository";
 import { EmployeeService } from "../modules/employees/service";
+import { MasterDataRepository } from "../modules/master-data/repository";
+import { MasterDataService } from "../modules/master-data/service";
 import { AIService } from "./ai.service";
 import { AssistantService } from "./assistant.service";
 
@@ -15,6 +17,7 @@ export interface Services {
   conversations: ConversationService;
   actionItems: ActionItemService;
   assistant: AssistantService;
+  masterData: MasterDataService;
 }
 
 /** Dependency container: wires repositories, services, and the AI co-pilot. */
@@ -42,5 +45,6 @@ export function createServices(handle: AppDatabaseHandle, config: AppConfig): Se
     conversations: new ConversationService(conversationRepo, employeeRepo),
     actionItems: new ActionItemService(actionItemRepo, employeeRepo, conversationRepo),
     assistant,
+    masterData: new MasterDataService(new MasterDataRepository(handle.db)),
   };
 }

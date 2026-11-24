@@ -72,6 +72,32 @@ const STATEMENTS: readonly string[] = [
   `CREATE INDEX IF NOT EXISTS action_items_status_idx ON action_items (status)`,
   `CREATE INDEX IF NOT EXISTS action_items_conversation_id_idx ON action_items (conversation_id)`,
   `CREATE INDEX IF NOT EXISTS action_items_employee_id_idx ON action_items (employee_id)`,
+
+  `CREATE TABLE IF NOT EXISTS master_data_entries (
+  id TEXT PRIMARY KEY NOT NULL,
+  owner_user_id TEXT NOT NULL,
+  category TEXT NOT NULL,
+  key TEXT NOT NULL,
+  display_name TEXT NOT NULL,
+  plural_label TEXT,
+  description TEXT,
+  color_hex TEXT,
+  frequency TEXT,
+  is_done INTEGER NOT NULL DEFAULT 0,
+  is_active INTEGER NOT NULL DEFAULT 1,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  country_iso TEXT,
+  scope TEXT,
+  date TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+)`,
+  `CREATE INDEX IF NOT EXISTS master_data_entries_owner_user_id_idx ON master_data_entries (owner_user_id)`,
+  `CREATE INDEX IF NOT EXISTS master_data_entries_owner_category_idx ON master_data_entries (owner_user_id, category)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS master_data_entries_owner_category_key_uq
+  ON master_data_entries (owner_user_id, category, key)`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS master_data_entries_owner_category_display_name_uq
+  ON master_data_entries (owner_user_id, category, lower(display_name))`,
 ];
 
 /**

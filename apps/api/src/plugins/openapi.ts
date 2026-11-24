@@ -12,7 +12,8 @@ export const openApiPlugin: FastifyPluginAsync = async (app) => {
         description:
           "AI-assisted leadership & people management API. " +
           "The typed RPC surface is served via tRPC at `/trpc` " +
-          "(procedures: `employee.*`, `conversation.*`, `actionItem.*`, `assistant.*`).",
+          "(procedures: `employee.*`, `conversation.*`, `actionItem.*`, `assistant.*`, " +
+          "`masterData.*`).",
         version: apiVersion,
       },
       tags: [{ name: "system", description: "Health & metadata" }],
