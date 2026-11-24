@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from "@testing-library/react-native";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react-native";
 import { jest, describe, beforeEach, it, expect } from "@jest/globals";
 import { useRouter, usePathname } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { createElement, type ReactNode } from "react";
 import { View } from "react-native";
 import { AuthProvider } from "../../src/auth/auth-context";
@@ -56,6 +56,7 @@ const mockedUseRouter = jest.mocked(useRouter);
 const mockedUsePathname = jest.mocked(usePathname);
 const mockedGetFirebaseAuth = jest.mocked(getFirebaseAuth);
 const mockedOnAuthStateChanged = jest.mocked(onAuthStateChanged);
+const mockedSignOut = jest.mocked(signOut);
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -126,6 +127,9 @@ describe("TabsLayout responsive shell", () => {
 
     const peopleItem = screen.getByTestId("drawer-item-/people");
     expect(peopleItem.props.accessibilityState).toMatchObject({ selected: false });
+
+    // The AppBar shows the mockup breadcrumb for the active administration entry.
+    expect(screen.getByText("Administration / Stammdaten")).toBeOnTheScreen();
   });
 
   it("highlights the overview entry at the root route", async () => {
@@ -138,6 +142,34 @@ describe("TabsLayout responsive shell", () => {
     expect(overviewItem.props.accessibilityState).toMatchObject({ selected: true });
     expect(screen.getByTestId("drawer-item-/stammdaten").props.accessibilityState).toMatchObject({
       selected: false,
+    });
+  });
+
+  it("signs out from the AppBar and returns to the login screen", async () => {
+    mockIsDesktop.mockImplementation(() => true);
+    const authStub = { currentUser: null } as never;
+    mockedGetFirebaseAuth.mockReturnValue(authStub);
+    const replace = jest.fn();
+    mockedUseRouter.mockReturnValue({
+      replace,
+      push: jest.fn(),
+      back: jest.fn(),
+    } as never);
+
+    await renderShell();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("desktop-signout")).toBeOnTheScreen();
+    });
+
+    await fireEvent.press(screen.getByTestId("desktop-signout"));
+
+    await waitFor(() => {
+      expect(mockedSignOut).toHaveBeenCalledWith(authStub);
+    });
+    // Signed-out state redirects back to the login screen.
+    await waitFor(() => {
+      expect(replace).toHaveBeenCalledWith("/(auth)/login");
     });
   });
 });
