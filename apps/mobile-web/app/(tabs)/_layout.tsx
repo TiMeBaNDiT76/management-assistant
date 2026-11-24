@@ -1,9 +1,42 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { useAuth } from "../../src/auth/auth-context";
 import { colors } from "../../src/theme/tokens";
 
-/** Bottom navigation mirroring the mockup areas (people, conversations, tasks). */
+/**
+ * Bottom navigation mirroring the mockup areas (people, conversations,
+ * tasks). Protected area: signed-out visitors are redirected to the login
+ * screen.
+ */
 export default function TabsLayout() {
+  const { status } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "signedOut") {
+      router.replace("/(auth)/login");
+    }
+  }, [status, router]);
+
+  if (status !== "signedIn") {
+    // Redirect in progress or session still loading.
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: colors.canvas,
+        }}
+        testID="tabs-guard"
+      >
+        <ActivityIndicator size="large" color={colors.primary.DEFAULT} />
+      </View>
+    );
+  }
+
   return (
     <Tabs
       screenOptions={{

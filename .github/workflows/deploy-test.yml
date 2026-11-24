@@ -104,6 +104,17 @@ jobs:
 
       - name: Export web bundle
         run: pnpm --filter @mgmt/mobile-web build
+        env:
+          # Firebase web config is embedded into the Expo bundle at build time
+          # (EXPO_PUBLIC_* vars). Secrets/vars only — no values in this repo.
+          EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
+          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
+          EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+          # TEST only: allows the mock dev-local-user login when explicitly
+          # enabled via a repository variable (defaults to disabled).
+          EXPO_PUBLIC_DEV_AUTH_BYPASS: ${{ vars.EXPO_PUBLIC_DEV_AUTH_BYPASS || '' }}
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
