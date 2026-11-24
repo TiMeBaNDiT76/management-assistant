@@ -1,0 +1,48 @@
+{
+  "name": "@mgmt/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fastify + tRPC API for the management-assistant (SQLite + Litestream ready)",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist out .turbo"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.4.3",
+    "@fastify/swagger": "^9.9.5",
+    "@fastify/swagger-ui": "^6.1.5",
+    "@google/genai": "^3.6.1",
+    "@mgmt/shared": "workspace:*",
+    "@trpc/server": "^11.31.1",
+    "better-sqlite3": "^13.2.0",
+    "dotenv": "^18.0.10",
+    "fastify": "^5.12.8",
+    "fastify-plugin": "^6.0.1",
+    "jose": "^6.2.18",
+    "sqlite-vec": "^0.1.9",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@trpc/client": "^11.31.1",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.4"
+  }
+}

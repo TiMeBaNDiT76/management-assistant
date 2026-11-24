@@ -1,0 +1,10 @@
+# Litestream replicates the SQLite WAL continuously to GCS.
+# Placeholders are expanded by litestream from the container environment.
+dbs:
+  - path: ${DB_PATH}
+    replicas:
+      - type: s3
+        bucket: ${LITESTREAM_BUCKET}
+        path: mgmt
+        endpoint: ${LITESTREAM_ENDPOINT}
+        region: auto

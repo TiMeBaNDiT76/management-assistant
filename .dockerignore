@@ -1,0 +1,32 @@
+# Never copy native macOS binaries / deps into Linux (amd64) images
+node_modules/
+**/node_modules/
+
+# Build caches & outputs (rebuilt inside the image)
+.turbo/
+**/.turbo/
+dist/
+**/dist/
+out/
+.eslintcache
+*.tsbuildinfo
+
+# Local SQLite databases — MUST never end up in an image
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets & environment files
+.env
+.env.*
+!.env.example
+
+# Git & CI
+.git/
+.github/
+
+# Non-essential assets
+mockups/
+apps/mobile-web/
+opencode.json*

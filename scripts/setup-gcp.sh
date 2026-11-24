@@ -49,6 +49,7 @@ for ROLE in \
     --member="serviceAccount:${SA_EMAIL}" \
     --role="$ROLE" \
     --quiet
+  sleep 5
 done
 
 echo ">>> 3. Erstelle GCS Buckets für SQLite Litestream Replikation (Test & Prod)..."

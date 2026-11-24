@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Builds & caches
+dist/
+out/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+
+# Expo
+.expo/
+web-build/
+
+# Environment & secrets — NEVER commit real values
+.env
+.env.*
+!.env.example
+
+# Local SQLite database (never commit, never ship to Docker)
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Test coverage
+coverage/
+
+# OS & editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Native build artifacts
+*.node
