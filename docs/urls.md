@@ -53,10 +53,12 @@ Stand: 2026-11-24 — Phase 0 abgeschlossen: TEST-Deployment grün und live veri
 | Enabled APIs | https://console.cloud.google.com/apis/dashboard?project=managerassistant |
 
 ### GCP-Komponenten (IDs, nicht URIs)
+- **Cloud Run Service-URL (TEST)**: `https://api-test-uqdribntpa-ey.a.run.app`
 - **Artifact Registry URL (Docker)**: `europe-west3-docker.pkg.dev/managerassistant/mgmt-assistant-repo`
 - **Runtime/Deploy Service Account**: `mgmt-api-runner@managerassistant.iam.gserviceaccount.com`
 - **WIF Provider (für GitHub OIDC)**: `projects/625137775758/locations/global/workloadIdentityPools/github-actions-pool/providers/github-oidc`
-- **Litestream-Replikat (S3-kompatibel)**: `gs://managerassistant-litestream-test/mgmt` bzw. `gs://managerassistant-litestream-prod/mgmt`
+- **Litestream-Replikat (nativ `gs`-Typ, ADC der Runtime-SA)**: `gs://managerassistant-litestream-test/mgmt` bzw. `gs://managerassistant-litestream-prod/mgmt` — Replikation in TEST läuft (Stichprobe: `ltx/`-Objekte im Bucket)
+- **Litestream-Version im Image**: v0.5.18 (Config wird im `entrypoint.sh` aus der Container-Umgebung gerendert — v0.5 expandiert keine Env-Vars in der YAML)
 
 ## Firebase
 
@@ -81,7 +83,11 @@ Stand: 2026-11-24 — Phase 0 abgeschlossen: TEST-Deployment grün und live veri
 | Branches (`develop`, `main`) | https://github.com/TiMeBaNDiT76/management-assistant/branches |
 | PR #1 (Monorepo-Scaffolding, gemerged) | https://github.com/TiMeBaNDiT76/management-assistant/pull/1 |
 | PR #2 (GCP-Setup-Alignment, gemerged) | https://github.com/TiMeBaNDiT76/management-assistant/pull/2 |
-| PR #3 (Deploy-Fixes, gemerged) | https://github.com/TiMeBaNDiT76/management-assistant/pull/3 |
+| PR #3 (Deploy-Fixes: pnpm deploy --legacy, Test-Dateien aus `app/`, gemerged) | https://github.com/TiMeBaNDiT76/management-assistant/pull/3 |
+| PR #4 (Deploy-Berechtigungen, `^@^`-Env-Syntax, Litestream `gs`-Typ, `docs/urls.md`, gemerged) | https://github.com/TiMeBaNDiT76/management-assistant/pull/4 |
+| PR #5 (Litestream-Upgrade v0.5.18, gemerged) | https://github.com/TiMeBaNDiT76/management-assistant/pull/5 |
+| PR #6 (Entrypoint rendert Litestream-Config aus Env, gemerged) | https://github.com/TiMeBaNDiT76/management-assistant/pull/6 |
+| PR #7 (Phase-0-Abschluss: `--allow-unauthenticated`, URLs verifiziert) | https://github.com/TiMeBaNDiT76/management-assistant/pull/7 |
 
 ### Relevante Action-Runs
 | Was | Run |
@@ -91,3 +97,13 @@ Stand: 2026-11-24 — Phase 0 abgeschlossen: TEST-Deployment grün und live veri
 | Deploy-TEST (Web grün, Litestream v0.3 fehlte gs) | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45401546237 |
 | Deploy-TEST (v0.5-Env-Expansion fehlte) | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45402548757 |
 | **Deploy-TEST — erster vollständig grüner Run** | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45403610077 |
+
+## Verifikation (2026-11-24, nach erstem grünem Deploy-Run)
+| Check | Ergebnis |
+|---|---|
+| `/health` | `{"status":"ok","version":"0.1.0"}` |
+| `/docs` (Swagger UI) | HTTP 200 |
+| `/trpc/employees.list` ohne Token | HTTP 401 (Auth-Wall aktiv; `DEV_BYPASS_AUTH` wird in Produktion ignoriert) |
+| Web-Bucket `index.html` | HTTP 200 (Expo-Export, ~27 KB) |
+| Litestream | Replikation läuft (`ltx/`-Objekte im Replikat-Bucket `managerassistant-litestream-test/mgmt/`) |
+| Cloud Run IAM | `allUsers` → `roles/run.invoker` (App-Auth via Firebase-JWT, nicht IAM; `--allow-unauthenticated` im Workflow sichert die Binding) |
