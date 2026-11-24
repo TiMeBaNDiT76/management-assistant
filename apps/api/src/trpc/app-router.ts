@@ -3,6 +3,7 @@ import { actionItemRouter } from "../modules/action-items/router";
 import { assistantRouter } from "../modules/assistant/router";
 import { conversationRouter } from "../modules/conversations/router";
 import { employeeRouter } from "../modules/employees/router";
+import { masterDataRouter } from "../modules/master-data/router";
 
 /**
  * Root tRPC router. Extend with new domain routers (OKRs, calendar, ...) —
@@ -13,6 +14,7 @@ export const appRouter = router({
   conversations: conversationRouter,
   actionItems: actionItemRouter,
   assistant: assistantRouter,
+  masterData: masterDataRouter,
 });
 
 export type AppRouter = typeof appRouter;

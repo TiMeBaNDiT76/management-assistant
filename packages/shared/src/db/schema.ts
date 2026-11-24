@@ -1,4 +1,5 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 
 /**
  * Drizzle schema for the manager's private workspace.
@@ -115,5 +116,67 @@ export const actionItems = sqliteTable(
     index("action_items_status_idx").on(table.status),
     index("action_items_conversation_id_idx").on(table.conversationId),
     index("action_items_employee_id_idx").on(table.employeeId),
+  ],
+);
+
+/**
+ * Generic master data (Stammdaten): roles, departments, relationship types,
+ * appointment types, task statuses, locations, countries and holidays.
+ *
+ * A single table with a `category` discriminator. `key` is the stable machine
+ * identifier (immutable, unique per tenant+category), `display_name` is the
+ * user-visible label (unique per tenant+category, case-insensitive — enforced
+ * via an expression index on `lower(display_name)`). Entries that are referenced
+ * by other tables must be deactivated instead of deleted (reference protection
+ * is enforced in the API layer via cross-table usage counts).
+ */
+export const masterDataEntries = sqliteTable(
+  "master_data_entries",
+  {
+    id: text("id").primaryKey(),
+    ownerUserId: text("owner_user_id").notNull(),
+    // One of MASTER_DATA_CATEGORIES
+    category: text("category").notNull(),
+    /** Stable machine key (slug), immutable after creation. */
+    key: text("key").notNull(),
+    displayName: text("display_name").notNull(),
+    pluralLabel: text("plural_label"),
+    description: text("description"),
+    /** Optional kanban/badge color, `#rgb` or `#rrggbb`. */
+    colorHex: text("color_hex"),
+    /** Optional recurrence label, mainly for appointment types. */
+    frequency: text("frequency"),
+    /** Task-status semantics: only "done"-type statuses end a task. */
+    isDone: integer("is_done", { mode: "boolean" }).notNull().default(false),
+    /** Deactivate instead of delete when the entry is still referenced. */
+    isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+    /** Stable display/kanban column order (asc). */
+    sortOrder: integer("sort_order").notNull().default(0),
+    /** ISO 3166-1 alpha-2 country code (countries + holidays). */
+    countryIso: text("country_iso"),
+    /** Holiday scope, e.g. "national" / "regional". */
+    scope: text("scope"),
+    /** Holiday date (ISO date YYYY-MM-DD). */
+    date: text("date"),
+    createdAt: text("created_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+    updatedAt: text("updated_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+  },
+  (table) => [
+    index("master_data_entries_owner_user_id_idx").on(table.ownerUserId),
+    index("master_data_entries_owner_category_idx").on(table.ownerUserId, table.category),
+    uniqueIndex("master_data_entries_owner_category_key_uq").on(
+      table.ownerUserId,
+      table.category,
+      table.key,
+    ),
+    uniqueIndex("master_data_entries_owner_category_display_name_uq").on(
+      table.ownerUserId,
+      table.category,
+      sql`lower(${table.displayName})`,
+    ),
   ],
 );
