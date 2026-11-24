@@ -78,6 +78,7 @@ jobs:
             --region "${{ env.GCP_REGION }}" \
             --max-instances=1 \
             --concurrency=80 \
+            --allow-unauthenticated \
             --service-account "${{ secrets.GCP_RUNTIME_SERVICE_ACCOUNT }}" \
             --set-env-vars "^@^NODE_ENV=production@DB_PATH=/data/mgmt.db@FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}@LITESTREAM_BUCKET=${{ secrets.GCP_PROJECT_ID }}-litestream-prod@LITESTREAM_ENDPOINT=https://storage.googleapis.com@GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}@GOOGLE_CLOUD_LOCATION=${{ vars.GCP_VERTEX_LOCATION || 'us-central1' }}@ALLOWED_ORIGINS=https://storage.googleapis.com,http://localhost:8081,http://localhost:19006"
 

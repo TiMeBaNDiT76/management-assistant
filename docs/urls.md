@@ -3,7 +3,7 @@
 Alle URLs des Projekts — GCP (Projekt `managerassistant`), GitHub (Repo
 `TiMeBaNDiT76/management-assistant`) und die deployten Anwendungen.
 
-Stand: 2026-11-24
+Stand: 2026-11-24 — Phase 0 abgeschlossen: TEST-Deployment grün und live verifiziert.
 
 ---
 
@@ -11,10 +11,10 @@ Stand: 2026-11-24
 
 | Was | URL |
 |---|---|
-| API `api-test` — Cloud Run (health) | _wird nach Deploy-Run eingetragen_ |
-| API `api-test` — Entry (API-Metadaten) | _dito_ |
-| API `api-test` — Swagger UI (`/docs`) | _dito_ |
-| API `api-test` — tRPC-Endpunkt | _dito_ |
+| API `api-test` — Cloud Run (health) | https://api-test-uqdribntpa-ey.a.run.app/health |
+| API `api-test` — Entry (API-Metadaten) | https://api-test-uqdribntpa-ey.a.run.app/ |
+| API `api-test` — Swagger UI (`/docs`) | https://api-test-uqdribntpa-ey.a.run.app/docs |
+| API `api-test` — tRPC-Endpunkt | https://api-test-uqdribntpa-ey.a.run.app/trpc |
 | Web `web-test` — statisches Expo Web (GCS) | https://storage.googleapis.com/managerassistant-web-test/index.html |
 
 ## Application (PROD — Deploy von `main`)
@@ -87,4 +87,7 @@ Stand: 2026-11-24
 | Was | Run |
 |---|---|
 | Erster Deploy-TEST-Versuch (fehlgeschlagen: pnpm deploy + Expo-Test-Routen) | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45399822256 |
-| Deploy-TEST nach Fix | _Run-ID wird nach Abschluss eingetragen_ |
+| Deploy-TEST nach Fix (Berechtigungen/Syntax) | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45400664708 |
+| Deploy-TEST (Web grün, Litestream v0.3 fehlte gs) | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45401546237 |
+| Deploy-TEST (v0.5-Env-Expansion fehlte) | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45402548757 |
+| **Deploy-TEST — erster vollständig grüner Run** | https://github.com/TiMeBaNDiT76/management-assistant/actions/runs/45403610077 |
