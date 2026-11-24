@@ -135,3 +135,22 @@ jobs:
             --cache-control="public, max-age=0, must-revalidate" \
             "apps/mobile-web/dist" \
             "gs://${{ secrets.GCP_PROJECT_ID }}-web-test/"
+
+      # GCS serves objects at exact keys only (no rewrite rules on the
+      # storage.googleapis.com endpoint). The static export writes
+      # <route>.html files, but the SPA addresses /<route> — so every route
+      # HTML is additionally uploaded under its extensionless key. Dynamic
+      # segments ([id]) cannot be prerendered per-key; refreshing such a
+      # deep link still 404s (client-side navigation works).
+      - name: Upload extensionless route fallbacks
+        run: |
+          find apps/mobile-web/dist -name '*.html' | while read -r f; do
+            rel="${f#apps/mobile-web/dist/}"
+            case "$rel" in
+              *"("*|"_sitemap.html"|"+not-found.html") continue ;;
+            esac
+            gcloud storage cp --quiet \
+              --cache-control="public, max-age=0, must-revalidate" \
+              "$f" \
+              "gs://${{ secrets.GCP_PROJECT_ID }}-web-test/${rel%.html}"
+          done
