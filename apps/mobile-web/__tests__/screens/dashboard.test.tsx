@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 import { describe, expect, it } from "@jest/globals";
-import DashboardScreen from "./index";
+import DashboardScreen from "../../app/(tabs)/index";
 
 describe("DashboardScreen", () => {
   it("renders greeting, KPI cards and briefing teaser", async () => {

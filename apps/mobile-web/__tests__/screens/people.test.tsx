@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 import { describe, expect, it } from "@jest/globals";
-import PeopleScreen from "./people";
+import PeopleScreen from "../../app/(tabs)/people";
 
 describe("PeopleScreen", () => {
   it("renders the header and all sample employees", async () => {
