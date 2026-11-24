@@ -1,10 +1,19 @@
 import { render, screen, waitFor, act, fireEvent } from "@testing-library/react-native";
-import { jest, describe, beforeEach, it, expect } from "@jest/globals";
-import { Text } from "react-native";
+import {
+  jest,
+  describe,
+  beforeEach,
+  afterEach,
+  it,
+  expect,
+} from "@jest/globals";
+import { Platform, Text } from "react-native";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseSignOut,
   type UserCredential,
 } from "firebase/auth";
@@ -21,6 +30,8 @@ jest.mock("firebase/auth", () => ({
   onAuthStateChanged: jest.fn(),
   signInWithEmailAndPassword: jest.fn(),
   createUserWithEmailAndPassword: jest.fn(),
+  signInWithPopup: jest.fn(),
+  GoogleAuthProvider: jest.fn(),
   signOut: jest.fn(),
 }));
 
@@ -31,6 +42,10 @@ jest.mock("../../src/lib/firebase", () => ({
 
 const mockedOnAuthStateChanged = jest.mocked(onAuthStateChanged);
 const mockedGetFirebaseAuth = jest.mocked(getFirebaseAuth);
+
+/** Shared GoogleAuthProvider instance captured by the mocked constructor. */
+const mockGoogleProvider = { addScope: jest.fn() };
+const defaultOS = Platform.OS;
 
 /** Renders the current auth state as text for assertions. */
 function AuthProbe() {
@@ -56,6 +71,13 @@ beforeEach(() => {
   jest.resetAllMocks();
   process.env.EXPO_PUBLIC_DEV_AUTH_BYPASS = "false";
   mockedGetFirebaseAuth.mockReturnValue({ currentUser: null } as never);
+  jest
+    .mocked(GoogleAuthProvider as unknown as jest.Mock)
+    .mockImplementation(() => mockGoogleProvider);
+});
+
+afterEach(() => {
+  Platform.OS = defaultOS;
 });
 
 describe("AuthProvider (dev bypass)", () => {
@@ -259,5 +281,129 @@ describe("AuthProvider actions (Firebase mode)", () => {
       expect(firebaseSignOut).toHaveBeenCalledTimes(1);
     });
     expect(stateCallback).toBeDefined();
+  });
+});
+
+describe("AuthProvider signInWithGoogle", () => {
+  let caught: unknown = "nothing";
+
+  function GoogleProbe() {
+    const { signInWithGoogle } = useAuth();
+    return (
+      <Text
+        testID="action"
+        onPress={() => {
+          void signInWithGoogle().catch((err) => {
+            caught = err;
+          });
+        }}
+      />
+    );
+  }
+
+  beforeEach(() => {
+    caught = "nothing";
+  });
+
+  it("rejects with a German hint on native platforms", async () => {
+    Platform.OS = "ios";
+
+    await render(
+      <AuthProvider>
+        <GoogleProbe />
+      </AuthProvider>,
+    );
+
+    await fireEvent.press(screen.getByTestId("action"));
+    await waitFor(() => {
+      expect((caught as Error).message).toBe(
+        "Google-Anmeldung ist auf Web verfügbar.",
+      );
+    });
+    expect(signInWithPopup).not.toHaveBeenCalled();
+  });
+
+  it("resolves instantly with the dev identity in dev bypass (web)", async () => {
+    Platform.OS = "web";
+    process.env.EXPO_PUBLIC_DEV_AUTH_BYPASS = "true";
+    mockedOnAuthStateChanged.mockImplementation(() => () => undefined);
+
+    let resolved = false;
+    function ResolvingGoogleProbe() {
+      const { signInWithGoogle } = useAuth();
+      return (
+        <Text
+          testID="action"
+          onPress={() => {
+            void signInWithGoogle().then(() => {
+              resolved = true;
+            });
+          }}
+        />
+      );
+    }
+    await render(
+      <AuthProvider>
+        <AuthProbe />
+        <ResolvingGoogleProbe />
+      </AuthProvider>,
+    );
+
+    await fireEvent.press(screen.getByTestId("action"));
+    await waitFor(() => {
+      expect(resolved).toBe(true);
+    });
+    expect(probeText()).toBe(`signedIn:${DEV_USER_ID}:-`);
+    expect(signInWithPopup).not.toHaveBeenCalled();
+  });
+
+  it("signs in via signInWithPopup with a Google provider (email + profile scopes)", async () => {
+    Platform.OS = "web";
+    mockedOnAuthStateChanged.mockImplementation(() => () => undefined);
+    jest
+      .mocked(signInWithPopup)
+      .mockResolvedValue({} as unknown as UserCredential);
+
+    await render(
+      <AuthProvider>
+        <GoogleProbe />
+      </AuthProvider>,
+    );
+
+    await fireEvent.press(screen.getByTestId("action"));
+    await waitFor(() => {
+      expect(signInWithPopup).toHaveBeenCalledWith(
+        expect.anything(),
+        mockGoogleProvider as unknown as GoogleAuthProvider,
+      );
+    });
+    expect(mockGoogleProvider.addScope).toHaveBeenCalledWith("email");
+    expect(mockGoogleProvider.addScope).toHaveBeenCalledWith("profile");
+    expect(caught).toBe("nothing");
+  });
+
+  it("propagates popup failures to the caller", async () => {
+    Platform.OS = "web";
+    mockedOnAuthStateChanged.mockImplementation(() => () => undefined);
+    jest
+      .mocked(signInWithPopup)
+      .mockRejectedValue(
+        Object.assign(new Error("popup failed"), {
+          code: "auth/popup-closed-by-user",
+        }),
+      );
+
+    await render(
+      <AuthProvider>
+        <GoogleProbe />
+      </AuthProvider>,
+    );
+
+    await fireEvent.press(screen.getByTestId("action"));
+    await waitFor(() => {
+      expect((caught as { code?: string }).code).toBe(
+        "auth/popup-closed-by-user",
+      );
+    });
   });
 });

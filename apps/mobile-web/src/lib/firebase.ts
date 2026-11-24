@@ -7,6 +7,7 @@
  * dev-bypass identity instead (see auth-context).
  */
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
+import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as firebaseAuth from "firebase/auth";
 import type {
@@ -15,13 +16,15 @@ import type {
   ReactNativeAsyncStorage,
 } from "firebase/auth";
 
-const { initializeAuth } = firebaseAuth;
+const { browserLocalPersistence, initializeAuth } = firebaseAuth;
 
 /**
- * `getReactNativePersistence` ships with the react-native entry of
- * `firebase/auth` (which Metro resolves at runtime via the package's
- * `react-native` export condition), but the default TypeScript types describe
- * the browser entry and omit it — hence the narrow typed accessor below.
+ * `getReactNativePersistence` only ships with the react-native entry of
+ * `firebase/auth` (which Metro resolves for native platforms via the
+ * package's `react-native` export condition); the browser entry — used on
+ * web — does not have it. The default TypeScript types describe the browser
+ * entry and omit it, hence the narrow typed accessor below. It is only
+ * invoked on the native path.
  */
 const getReactNativePersistence = (
   firebaseAuth as unknown as {
@@ -52,14 +55,22 @@ export function readFirebaseConfig(): FirebaseWebConfig | null {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 
-/** Lazily initializes Firebase Auth with AsyncStorage persistence. */
+/**
+ * Lazily initializes Firebase Auth with platform-appropriate persistence:
+ * `browserLocalPersistence` (localStorage) on web — where the react-native
+ * entry (and thus `getReactNativePersistence`) does not exist — and
+ * AsyncStorage-backed persistence on native platforms.
+ */
 export function getFirebaseAuth(): Auth | null {
   if (auth) return auth;
   const config = readFirebaseConfig();
   if (!config) return null;
   app = getApps().length > 0 ? getApps()[0]! : initializeApp(config);
   auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
+    persistence:
+      Platform.OS === "web"
+        ? browserLocalPersistence
+        : getReactNativePersistence(AsyncStorage),
   });
   return auth;
 }
