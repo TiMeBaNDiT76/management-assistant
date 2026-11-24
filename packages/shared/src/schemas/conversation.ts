@@ -1,8 +1,17 @@
 import { z } from "zod";
-import { CONVERSATION_STATUSES, CONVERSATION_TYPES } from "../constants";
+import { CONVERSATION_STATUSES } from "../constants";
+import { APPOINTMENT_TYPE_SEED_KEYS } from "../master-data";
 import { moodSchema, paginationSchema } from "./common";
 
-export const conversationTypeSchema = z.enum(CONVERSATION_TYPES);
+/**
+ * Appointment/conversation type — validated against the machine `key`s of the
+ * `appointment_type` master-data seed category (single source of truth; the
+ * seed keys mirror the legacy `CONVERSATION_TYPES` enum, so the accepted wire
+ * values are unchanged).
+ */
+export const conversationTypeSchema = z.enum(APPOINTMENT_TYPE_SEED_KEYS);
+
+/** Lifecycle statuses of a conversation — not master-data-seeded (no category), stays a fixed enum. */
 export const conversationStatusSchema = z.enum(CONVERSATION_STATUSES);
 
 export const conversationCreateSchema = z.object({

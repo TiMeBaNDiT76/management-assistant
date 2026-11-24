@@ -1,6 +1,12 @@
 /** Domain constants shared between API and mobile app. */
 
-/** Types of relationships between employees (reporting lines, peers, ...). */
+/**
+ * Types of relationships between employees (reporting lines, peers, ...).
+ *
+ * Typed mirror of the `relationship_type` master-data seed keys — validation
+ * resolves against the seeds (`RELATIONSHIP_TYPE_SEED_KEYS`), keep this list
+ * in sync with `MASTER_DATA_SEEDS` (regression-guarded by tests).
+ */
 export const EMPLOYEE_RELATIONSHIP_TYPES = [
   "reports_to",
   "peer",
@@ -10,17 +16,35 @@ export const EMPLOYEE_RELATIONSHIP_TYPES = [
 ] as const;
 export type EmployeeRelationshipType = (typeof EMPLOYEE_RELATIONSHIP_TYPES)[number];
 
-/** Types of tracked conversations (1:1s, feedback, career, ...). */
+/**
+ * Types of tracked conversations (1:1s, feedback, career, ...).
+ *
+ * Typed mirror of the `appointment_type` master-data seed keys — validation
+ * resolves against the seeds (`APPOINTMENT_TYPE_SEED_KEYS`), keep this list
+ * in sync with `MASTER_DATA_SEEDS` (regression-guarded by tests).
+ */
 export const CONVERSATION_TYPES = ["one_on_one", "feedback", "career", "adhoc"] as const;
 export type ConversationType = (typeof CONVERSATION_TYPES)[number];
 
-/** Lifecycle statuses of a conversation. */
+/** Lifecycle statuses of a conversation. Not master-data-seeded (no category). */
 export const CONVERSATION_STATUSES = ["planned", "completed", "cancelled"] as const;
 export type ConversationStatus = (typeof CONVERSATION_STATUSES)[number];
 
-/** Lifecycle statuses of an action item. */
+/**
+ * Lifecycle statuses of an action item.
+ *
+ * Typed mirror of the `task_status` master-data seed keys — validation
+ * resolves against the seeds (`TASK_STATUS_SEED_KEYS`), keep this list
+ * in sync with `MASTER_DATA_SEEDS` (regression-guarded by tests).
+ */
 export const ACTION_ITEM_STATUSES = ["open", "in_progress", "done", "cancelled"] as const;
 export type ActionItemStatus = (typeof ACTION_ITEM_STATUSES)[number];
+
+/** Statuses matched by the `openOnly` list filter — everything not yet terminal. */
+export const ACTION_ITEM_OPEN_STATUSES = ["open", "in_progress"] as const;
+
+/** Default status for new action items (mirrors the `action_items.status` DB default / `task_status` seed key `open`). */
+export const ACTION_ITEM_DEFAULT_STATUS = "open";
 
 /**
  * Fixed categories of user-editable master data (Stammdaten).

@@ -36,8 +36,14 @@ export interface MasterDataSeedEntry {
   date?: string | null;
 }
 
-/** Seed dataset covering all 8 categories (`is_done` only on "done"). */
-export const MASTER_DATA_SEEDS: readonly MasterDataSeedEntry[] = [
+/**
+ * Seed dataset covering all 8 categories (`is_done` only on "done").
+ *
+ * Declared with `as const satisfies` so the literal `category` / `key` types
+ * survive — `master-data/keys.ts` derives the typed seed-key unions for the
+ * enum-backed categories from it (single source of truth).
+ */
+export const MASTER_DATA_SEEDS = [
   // --- role ---------------------------------------------------------------
   {
     category: "role",
@@ -357,7 +363,7 @@ export const MASTER_DATA_SEEDS: readonly MasterDataSeedEntry[] = [
     description: "Gesetzlicher Feiertag in Deutschland.",
     sortOrder: 90,
   },
-];
+] as const satisfies readonly MasterDataSeedEntry[];
 
 /**
  * Idempotently seeds the default master data for one tenant: for every
@@ -376,7 +382,8 @@ export async function ensureDefaultMasterData(
     .where(eq(masterDataEntries.ownerUserId, ownerUserId));
   const seededCategories = new Set(existing.map((row) => row.category));
 
-  const missingSeeds = MASTER_DATA_SEEDS.filter(
+  // Widen back to the interface so optional seed fields are uniformly present.
+  const missingSeeds: readonly MasterDataSeedEntry[] = MASTER_DATA_SEEDS.filter(
     (seed) => !seededCategories.has(seed.category),
   );
   if (missingSeeds.length === 0) return;
