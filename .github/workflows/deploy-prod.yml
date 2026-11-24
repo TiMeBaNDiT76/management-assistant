@@ -113,6 +113,10 @@ jobs:
           EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
           EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
           EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+          # Static export is served from the bucket as first path segment
+          # (storage.googleapis.com/<bucket>/...). Assets/links must be
+          # prefixed accordingly (experiments.baseUrl).
+          EXPO_PUBLIC_BASE_URL: /${{ secrets.GCP_PROJECT_ID }}-web-prod
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
