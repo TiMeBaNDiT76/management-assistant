@@ -1,5 +1,5 @@
 /**
- * Tests for apps/mobile-web/app.config.js.
+ * Tests for apps/mobile-web/app.config.ts.
  *
  * The static web export is served from a GCS bucket subpath in TEST/PROD
  * (bucket name = first path segment). `experiments.baseUrl` must therefore
@@ -17,6 +17,7 @@ describe("app.config", () => {
     let config: AppConfig | undefined;
     // Re-require the config module so it re-reads process.env at load time.
     jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports -- CJS Expo config module; require() is the only way to re-evaluate it per test without --experimental-vm-modules
       config = require("../app.config") as AppConfig;
     });
     if (!config) {
