@@ -10,6 +10,17 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
+    // Custom screens: `ns` is the desktop-shell breakpoint from
+    // /mockups/070-stammdaten/_palette.css (@media max-width: 760px hides the
+    // drawer; the shell switches to AppBar 64px + 240px sidebar). Use it as
+    // `ns:flex-row` etc. All Tailwind default breakpoints are kept unchanged.
+    screens: {
+      ns: "760px",
+      sm: "640px",
+      md: "768px",
+      lg: "1024px",
+      xl: "1280px",
+    },
     extend: {
       colors: {
         // --mud-primary / -dark / -soft

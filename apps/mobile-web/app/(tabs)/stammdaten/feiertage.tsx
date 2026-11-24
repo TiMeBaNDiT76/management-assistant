@@ -5,7 +5,7 @@ import { EditorHeader } from "../../../components/stammdaten/EditorHeader";
 import { StatusChip } from "../../../components/StatusChip";
 import { ConfirmDialog } from "../../../components/stammdaten/ConfirmDialog";
 import { EmptyState, ErrorState } from "../../../components/stammdaten/EmptyState";
-import { FormDialog } from "../../../components/stammdaten/FormDialog";
+import { FormDialog, FormRow } from "../../../components/stammdaten/FormDialog";
 import { NoticeBanner } from "../../../components/stammdaten/NoticeBanner";
 import { OptionSelect } from "../../../components/stammdaten/OptionSelect";
 import { RowActionsMenu, type RowAction } from "../../../components/stammdaten/RowActionsMenu";
@@ -375,24 +375,26 @@ export default function FeiertageScreen() {
         saving={actions.create.isPending || actions.update.isPending}
         error={formError}
       >
-        <TextField
-          label="Datum"
-          value={date}
-          onChangeText={setDate}
-          placeholder="JJJJ-MM-TT"
-          error={dateError}
-          autoCapitalize="none"
-          testID="field-date"
-        />
-        <TextField
-          label="Name"
-          value={displayName}
-          onChangeText={setDisplayName}
-          placeholder="z. B. Neujahr"
-          required
-          error={nameError}
-          testID="field-display-name"
-        />
+        <FormRow>
+          <TextField
+            label="Datum"
+            value={date}
+            onChangeText={setDate}
+            placeholder="JJJJ-MM-TT"
+            error={dateError}
+            autoCapitalize="none"
+            testID="field-date"
+          />
+          <TextField
+            label="Name"
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="z. B. Neujahr"
+            required
+            error={nameError}
+            testID="field-display-name"
+          />
+        </FormRow>
         <View>
           <Text className="text-xs font-semibold" style={{ color: colors.inkSecondary }}>
             Scope

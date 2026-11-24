@@ -30,7 +30,7 @@ jest.mock("expo-router", () => {
     mockCreateElement(mockView, { testID: "tabs" }, children);
   Tabs.Screen = ({ children }: { children: ReactNode }) =>
     mockCreateElement(mockView, null, children);
-  return { Tabs, useRouter: jest.fn() };
+  return { Tabs, useRouter: jest.fn(), usePathname: jest.fn(() => "/") };
 });
 
 jest.mock("@expo/vector-icons", () => ({

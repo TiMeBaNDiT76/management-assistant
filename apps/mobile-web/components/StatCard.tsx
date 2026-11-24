@@ -10,7 +10,7 @@ interface StatCardProps {
 export function StatCard({ value, label }: StatCardProps) {
   return (
     <View
-      className="flex-1 rounded-mudlg border border-divider bg-surface p-4"
+      className="flex-1 ns:flex-none rounded-mudlg border border-divider bg-surface p-4"
       testID="stat-card"
     >
       <Text className="text-2xl font-bold" style={{ color: colors.primary.DEFAULT }}>

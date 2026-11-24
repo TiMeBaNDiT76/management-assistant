@@ -1,18 +1,24 @@
-import { Text, View } from "react-native";
+import { useWindowDimensions, Text, View } from "react-native";
 import { ScreenHeader } from "../../../components/ScreenHeader";
 import { colors } from "../../../src/theme/tokens";
 import { StatusChip } from "../../../components/StatusChip";
 import { MasterDataTypeCard } from "../../../components/stammdaten/MasterDataTypeCard";
+import { ResponsiveGrid } from "../../../components/ResponsiveGrid";
 import {
   MASTER_DATA_CATEGORY_META,
   MASTER_DATA_CATEGORY_ORDER,
 } from "../../../src/lib/master-data-ui";
+import { cardGridColumns } from "../../../src/lib/responsive";
 
 /**
  * Stammdaten-Übersicht (see /mockups/070-stammdaten/stammdaten-app.html):
  * one card per data type, each with a live counter of its active entries.
+ * Card grid 4 → 2 → 1 columns (≥1050 / ≤1050 / ≤560 window width).
  */
 export default function StammdatenScreen() {
+  const { width } = useWindowDimensions();
+  const columns = cardGridColumns(width);
+
   return (
     <View className="flex-1 bg-canvas">
       <View className="px-6 pt-12 pb-2">
@@ -29,14 +35,17 @@ export default function StammdatenScreen() {
         </Text>
       </View>
       <View className="flex-1 px-4 pb-6" testID="stammdaten-cards">
-        {MASTER_DATA_CATEGORY_ORDER.map((category) => (
-          <MasterDataTypeCard
-            key={category}
-            meta={MASTER_DATA_CATEGORY_META[category]}
-          />
-        ))}
+        <ResponsiveGrid
+          items={MASTER_DATA_CATEGORY_ORDER}
+          columns={columns}
+          keyOf={(category) => category}
+          renderItem={(category) => (
+            <MasterDataTypeCard meta={MASTER_DATA_CATEGORY_META[category]} />
+          )}
+          gap={12}
+          testID="stammdaten-grid"
+        />
       </View>
     </View>
   );
 }
-
