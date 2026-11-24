@@ -6,9 +6,9 @@ import { useAuth } from "../../src/auth/auth-context";
 import { colors } from "../../src/theme/tokens";
 
 /**
- * Bottom navigation mirroring the mockup areas (people, conversations,
- * tasks). Protected area: signed-out visitors are redirected to the login
- * screen.
+ * Bottom navigation mirroring the mockup areas (people, conversations, tasks)
+ * plus the Administration area (Stammdaten). Protected area: signed-out
+ * visitors are redirected to the login screen.
  */
 export default function TabsLayout() {
   const { status } = useAuth();
@@ -81,6 +81,24 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="stammdaten/index"
+        options={{
+          title: "Stammdaten",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={String(color)} />
+          ),
+        }}
+      />
+      {/* Category editors render inside the shell but are not tab buttons. */}
+      <Tabs.Screen name="stammdaten/rollen" options={{ href: null }} />
+      <Tabs.Screen name="stammdaten/abteilungen" options={{ href: null }} />
+      <Tabs.Screen name="stammdaten/beziehungstypen" options={{ href: null }} />
+      <Tabs.Screen name="stammdaten/terminarten" options={{ href: null }} />
+      <Tabs.Screen name="stammdaten/task-status" options={{ href: null }} />
+      <Tabs.Screen name="stammdaten/standorte" options={{ href: null }} />
+      <Tabs.Screen name="stammdaten/feiertage" options={{ href: null }} />
+      <Tabs.Screen name="stammdaten/laender" options={{ href: null }} />
     </Tabs>
   );
 }

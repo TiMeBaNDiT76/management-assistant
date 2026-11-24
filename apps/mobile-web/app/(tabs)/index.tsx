@@ -1,8 +1,15 @@
 import { ScrollView, Text, View } from "react-native";
 import { StatCard } from "../../components/StatCard";
 import { useGreeting } from "../../src/hooks/useGreeting";
+import { useAuth } from "../../src/auth/auth-context";
 import { sampleActionItems } from "../../src/fixtures/sample-data";
 import { colors } from "../../src/theme/tokens";
+
+/** Signed-in identity without real names in source: email local-part or a neutral fallback. */
+export function displayNameForGreeting(email: string | null | undefined): string {
+  const localPart = email?.split("@")[0]?.trim();
+  return localPart ? localPart : "Admin";
+}
 
 /**
  * Dashboard — greeting and key numbers.
@@ -10,6 +17,7 @@ import { colors } from "../../src/theme/tokens";
  */
 export default function DashboardScreen() {
   const greeting = useGreeting();
+  const { user } = useAuth();
   const openTasks = sampleActionItems.filter((item) => item.status !== "done").length;
 
   return (
@@ -22,7 +30,7 @@ export default function DashboardScreen() {
           Mein Team
         </Text>
         <Text className="text-3xl font-bold" style={{ color: colors.ink }}>
-          {greeting}, Sven
+          {greeting}, {displayNameForGreeting(user?.email)}
         </Text>
         <Text className="mt-1 text-sm" style={{ color: colors.inkSecondary }}>
           Deine Woche im Überblick.
