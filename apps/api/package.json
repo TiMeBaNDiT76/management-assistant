@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^11.4.3",
+    "@fastify/static": "^10.1.12",
     "@fastify/swagger": "^9.9.5",
     "@fastify/swagger-ui": "^6.1.5",
     "@google/genai": "^3.6.1",

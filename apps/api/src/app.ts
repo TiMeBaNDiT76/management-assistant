@@ -11,6 +11,7 @@ import type { AppConfig } from "./config";
 import { loadConfig } from "./config";
 import { healthPlugin } from "./plugins/health";
 import { openApiPlugin } from "./plugins/openapi";
+import { resolveWebDistPath, webStaticPlugin } from "./plugins/web-static";
 import { createServices, type Services } from "./services/container";
 import { appRouter, type AppRouter } from "./trpc/app-router";
 import type { TrpcContext } from "./trpc/context";
@@ -49,11 +50,18 @@ function toWebRequest(request: FastifyRequest): Request {
 
 /**
  * Builds the Fastify application: SQLite (WAL) + CORS + Firebase auth +
- * OpenAPI docs at `/docs` + tRPC at `/trpc` + `/health`.
+ * OpenAPI docs at `/docs` + tRPC at `/trpc` + `/health`, plus optional
+ * static hosting of the exported web app at `/` (when `WEB_DIST_PATH`
+ * points at an existing directory, e.g. inside the Cloud Run image).
  */
 export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
   const config: AppConfig = { ...loadConfig(), ...options };
   const handle = initializeDatabase({ filename: config.dbPath });
+
+  // Static hosting for the exported web app — only when the dist directory
+  // exists (Cloud Run image stages it at /app/web); locally without a staged
+  // export the API behaves exactly as before (API-only, JSON root metadata).
+  const webDistPath = resolveWebDistPath(config.webDistPath);
 
   const app = Fastify({
     logger: { level: config.logLevel },
@@ -68,10 +76,18 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     {
       devBypassAuth: config.devBypassAuth,
       firebaseProjectId: config.firebaseProjectId,
+      // SPA documents/assets are browser navigations without bearer tokens.
+      publicStaticPaths: webDistPath !== undefined,
     },
   );
   await app.register(openApiPlugin);
-  await app.register(healthPlugin);
+  await app.register(healthPlugin, { includeRootMetadata: webDistPath === undefined });
+
+  if (webDistPath) {
+    // fastify-plugin wrapper: registers at the root scope so the plugin's
+    // `setNotFoundHandler` (SPA fallback) applies to every unmatched request.
+    await app.register(fp(webStaticPlugin, { name: "web-static-plugin" }), { webDistPath });
+  }
 
   const services = createServices(handle, config);
   app.decorate("services", services);

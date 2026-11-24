@@ -1,5 +1,6 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import type { FastifyPluginAsync } from "fastify";
+import { isApiPath } from "../plugins/web-static";
 
 /** Request identity resolved from the verified Firebase Auth JWT. */
 export interface AuthUser {
@@ -21,15 +22,24 @@ export const DEV_USER_ID = "dev-local-user";
 export interface AuthPluginOptions {
   devBypassAuth: boolean;
   firebaseProjectId?: string;
+  /**
+   * True when the API also serves the exported web app: SPA navigations and
+   * static assets are requested by the browser without a bearer token, so all
+   * non-API paths are public. Data stays protected via `/trpc`.
+   */
+  publicStaticPaths?: boolean;
 }
 
 /** Routes reachable without a bearer token. */
 const EXEMPT_URLS = new Set(["/", "/health"]);
 
-function isExempt(url: string): boolean {
+function isExempt(url: string, publicStaticPaths: boolean): boolean {
   const path = url.split("?")[0] ?? url;
   if (EXEMPT_URLS.has(path)) return true;
-  return path === "/docs" || path.startsWith("/docs/");
+  if (path === "/docs" || path.startsWith("/docs/")) return true;
+  // When serving the web app, SPA documents/assets are public while the API
+  // (any /trpc path) still requires a verified token.
+  return publicStaticPaths && !isApiPath(path);
 }
 
 const FIREBASE_JWKS_URL =
@@ -45,7 +55,7 @@ export const authPlugin: FastifyPluginAsync<AuthPluginOptions> = async (app, opt
     : undefined;
 
   app.addHook("onRequest", async (request, reply) => {
-    if (isExempt(request.url)) return;
+    if (isExempt(request.url, options.publicStaticPaths === true)) return;
 
     if (options.devBypassAuth) {
       request.user = { id: DEV_USER_ID };

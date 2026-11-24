@@ -24,6 +24,12 @@ export interface AppConfig {
   firebaseProjectId?: string;
   allowedOrigins: string[];
   ai: AIConfig;
+  /**
+   * Directory of the exported web app (Expo static export) served by the API
+   * at `/`. Static hosting is only enabled when the directory exists (see
+   * `resolveWebDistPath`) — unset means API-only behaviour.
+   */
+  webDistPath?: string;
 }
 
 function parseBoolean(value: string | undefined): boolean {
@@ -70,5 +76,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       .map((origin: string) => origin.trim())
       .filter((origin: string) => origin.length > 0),
     ai,
+    webDistPath: env.WEB_DIST_PATH || undefined,
   };
 }
