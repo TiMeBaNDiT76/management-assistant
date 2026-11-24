@@ -1,0 +1,125 @@
+name: Deploy TEST
+
+# deploy branch -> Cloud Run `api-test` + web bucket `web-test`.
+# TEST environment of the single GCP project.
+
+on:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-test
+  cancel-in-progress: false
+
+env:
+  GCP_REGION: ${{ vars.GCP_REGION || 'europe-west3' }}
+  SERVICE: api-test
+  AR_REPOSITORY: ${{ vars.AR_REPOSITORY || 'management-assistant' }}
+
+jobs:
+  qa-gate:
+    name: QA Gate
+    uses: ./.github/workflows/qa-gate.yml
+
+  build-and-push-api:
+    name: Build & push API image
+    needs: qa-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker auth
+        run: gcloud auth configure-docker "${{ env.GCP_REGION }}-docker.pkg.dev" --quiet
+
+      - name: Build image (linux/amd64)
+        run: |
+          IMAGE="${{ env.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/api:${{ github.sha }}"
+          docker build --platform linux/amd64 -f apps/api/Dockerfile -t "$IMAGE" .
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Push image
+        run: docker push "$IMAGE"
+
+  deploy-api:
+    name: Deploy api-test (Cloud Run)
+    needs: build-and-push-api
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      # SQLite on Cloud Run: exactly one instance, Litestream-wrapped writes.
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "${{ env.SERVICE }}" \
+            --project "${{ secrets.GCP_PROJECT_ID }}" \
+            --image "${{ env.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.AR_REPOSITORY }}/api:${{ github.sha }}" \
+            --region "${{ env.GCP_REGION }}" \
+            --max-instances=1 \
+            --concurrency=80 \
+            --service-account "${{ secrets.GCP_RUNTIME_SERVICE_ACCOUNT }}" \
+            --set-env-vars "NODE_ENV=production" \
+            --set-env-vars "DB_PATH=/data/mgmt.db" \
+            --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" \
+            --set-env-vars "LITESTREAM_BUCKET=${{ secrets.GCP_PROJECT_ID }}-db-test" \
+            --set-env-vars "LITESTREAM_ENDPOINT=https://storage.googleapis.com" \
+            --set-env-vars "GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}" \
+            --set-env-vars "GOOGLE_CLOUD_LOCATION=${{ vars.GCP_VERTEX_LOCATION || 'us-central1' }}"
+
+  deploy-web:
+    name: Deploy web-test (static export)
+    needs: qa-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Export web bundle
+        run: pnpm --filter @mgmt/mobile-web build
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Upload to web bucket
+        run: |
+          gcloud storage rsync --recursive --quiet \
+            "apps/mobile-web/dist" \
+            "gs://${{ secrets.GCP_PROJECT_ID }}-web-test/"

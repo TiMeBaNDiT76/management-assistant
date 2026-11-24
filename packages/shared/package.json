@@ -1,0 +1,40 @@
+{
+  "name": "@mgmt/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared Drizzle SQLite schema, Zod schemas and DB bootstrap for the management-assistant monorepo",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.4",
+    "sqlite-vec": "^0.1.9",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "better-sqlite3": "^13.2.0",
+    "typescript": "~6.0.3",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "better-sqlite3": ">=11"
+  }
+}
