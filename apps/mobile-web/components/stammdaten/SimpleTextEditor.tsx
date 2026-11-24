@@ -180,9 +180,10 @@ export function SimpleTextEditor({
         <Text className="text-xs font-semibold uppercase" style={{ color: colors.primary.DEFAULT }}>
           {eyebrow}
         </Text>
-        <View className="flex-row items-start justify-between">
+        {/* page-head stacks below 760px (mockup _palette.css @media rule). */}
+        <View className="flex-col items-start justify-between gap-3 ns:flex-row ns:items-start ns:gap-0">
           <ScreenHeader title={title} subtitle={subtitle} />
-          <View style={{ gap: 8 }}>
+          <View className="items-start ns:items-end" style={{ gap: 8 }}>
             <StatusChip label={`${activeCount} aktiv`} />
             <AppButton label={createLabel} onPress={openCreate} />
           </View>

@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { Children } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import { colors } from "../../src/theme/tokens";
+import { useIsDesktop } from "../../src/hooks/useIsDesktop";
 import { AppButton } from "./AppButton";
 
 interface FormDialogProps {
@@ -16,6 +18,26 @@ interface FormDialogProps {
   /** Inline German validation / API error shown above the actions. */
   error?: string | null;
   children: ReactNode;
+}
+
+/**
+ * Responsive form row inside dialogs (mockup `stammdaten-rollen.html`
+ * `.form-grid`: multiple columns on desktop, stacked below the breakpoint).
+ * Short fields (name + color etc.) sit side by side on desktop; children
+ * stack full-width on phones.
+ */
+export function FormRow({ children }: { children: ReactNode }) {
+  const isDesktop = useIsDesktop();
+  return (
+    <View
+      style={{ flexDirection: isDesktop ? "row" : "column", gap: 14 }}
+      testID="form-row"
+    >
+      {Children.map(children, (child) => (
+        <View style={isDesktop ? { flex: 1 } : undefined}>{child}</View>
+      ))}
+    </View>
+  );
 }
 
 /**

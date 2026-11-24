@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { Pressable, ScrollView, Switch, Text, View, useWindowDimensions } from "react-native";
 import { EditorHeader } from "../../../components/stammdaten/EditorHeader";
 import { StatusChip } from "../../../components/StatusChip";
 import { AppButton } from "../../../components/stammdaten/AppButton";
 import { ColorField } from "../../../components/stammdaten/ColorField";
 import { ConfirmDialog } from "../../../components/stammdaten/ConfirmDialog";
 import { EmptyState, ErrorState } from "../../../components/stammdaten/EmptyState";
-import { FormDialog } from "../../../components/stammdaten/FormDialog";
+import { FormDialog, FormRow } from "../../../components/stammdaten/FormDialog";
 import { NoticeBanner } from "../../../components/stammdaten/NoticeBanner";
 import { RowActionsMenu, type RowAction } from "../../../components/stammdaten/RowActionsMenu";
 import { SwitchField } from "../../../components/stammdaten/SwitchField";
@@ -22,6 +22,7 @@ import {
 } from "../../../src/lib/master-data-ui";
 import type { MasterDataEntryWithUsage } from "@mgmt/shared";
 import { colors } from "../../../src/theme/tokens";
+import { showColorLabel, showUsageColumn } from "../../../src/lib/responsive";
 
 type DialogState =
   | { mode: "create" }
@@ -42,6 +43,11 @@ type ConfirmState = {
 export default function TaskStatusScreen() {
   const trpc = useTRPC();
   const actions = useMasterDataActions();
+  const { width } = useWindowDimensions();
+  // Responsive status row (mockup stammdaten-taskstatus.html): the usage
+  // column hides at ≤900px, the color label at ≤620px.
+  const withUsage = showUsageColumn(width);
+  const withColorLabel = showColorLabel(width);
   const listQuery = useQuery(
     trpc.masterData.list.queryOptions({ category: "task_status", includeInactive: true }),
   );
@@ -318,7 +324,8 @@ export default function TaskStatusScreen() {
                 style={{ backgroundColor: entry.isActive ? colors.surface : "#FAFAFA" }}
                 testID={`entry-row-${entry.key}`}
               >
-                <View className="flex-row items-start justify-between">
+                {/* flex-wrap keeps switch/chip/actions usable on very narrow windows. */}
+                <View className="flex-row flex-wrap items-start justify-between">
                   <View className="flex-row items-start" style={{ gap: 10 }}>
                     <View className="items-center" style={{ gap: 2 }}>
                       <Pressable
@@ -405,9 +412,11 @@ export default function TaskStatusScreen() {
                     <RowActionsMenu actions={rowActions(entry)} />
                   </View>
                 </View>
-                <Text className="mt-1 text-xs" style={{ color: colors.inkSecondary }}>
-                  Position {index + 1} · {entry.colorHex ?? "—"} ·{" "}
-                  {formatUsageCount(entry.usageCount, { singular: "Task", plural: "Tasks" })}
+                <Text className="mt-1 text-xs" style={{ color: colors.inkSecondary }} testID={`entry-meta-${entry.key}`}>
+                  {withColorLabel ? `Position ${index + 1} · ${entry.colorHex ?? "—"}` : `Position ${index + 1}`}
+                  {withUsage
+                    ? ` · ${formatUsageCount(entry.usageCount, { singular: "Task", plural: "Tasks" })}`
+                    : null}
                 </Text>
               </View>
             ))}
@@ -446,15 +455,20 @@ export default function TaskStatusScreen() {
             <Text className="mb-3 text-xs" style={{ color: colors.inkSecondary }}>
               Spalten folgen dieser Reihenfolge · Farbänderungen aktualisieren die Vorschau
             </Text>
-            <View className="flex-row flex-wrap" style={{ gap: 8 }}>
+            {/* Horizontal scroll like the mockup `.columns { overflow: auto }` — columns keep a
+                minimum width instead of squeezing on narrow windows. */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator
+              contentContainerStyle={{ gap: 12 }}
+              testID="kanban-columns-scroll"
+            >
               {activeOrdered.map((entry) => (
                 <View
                   key={entry.id}
                   className="rounded-lg bg-surface"
                   style={{
-                    minWidth: 120,
-                    flexBasis: "30%",
-                    flexGrow: 1,
+                    minWidth: 150,
                     borderTopWidth: 4,
                     borderTopColor: entry.colorHex ?? colors.inkDisabled,
                     backgroundColor: "#F1F5F9",
@@ -462,7 +476,7 @@ export default function TaskStatusScreen() {
                   }}
                   testID={`kanban-column-${entry.key}`}
                 >
-                  <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center justify-between" style={{ gap: 12 }}>
                     <Text className="text-xs font-bold" style={{ color: colors.ink }}>
                       {entry.displayName}
                     </Text>
@@ -477,7 +491,7 @@ export default function TaskStatusScreen() {
                   ) : null}
                 </View>
               ))}
-            </View>
+            </ScrollView>
           </View>
         ) : null}
       </View>
@@ -490,16 +504,18 @@ export default function TaskStatusScreen() {
         saving={actions.create.isPending || actions.update.isPending}
         error={formError}
       >
-        <TextField
-          label="Statusname"
-          value={displayName}
-          onChangeText={setDisplayName}
-          placeholder="z. B. In Bearbeitung"
-          required
-          error={nameError}
-          testID="field-display-name"
-        />
-        <ColorField value={colorHex} onChange={setColorHex} error={colorError} testID="field-color" />
+        <FormRow>
+          <TextField
+            label="Statusname"
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="z. B. In Bearbeitung"
+            required
+            error={nameError}
+            testID="field-display-name"
+          />
+          <ColorField value={colorHex} onChange={setColorHex} error={colorError} testID="field-color" />
+        </FormRow>
         <TextField
           label="Beschreibung"
           value={description}

@@ -6,7 +6,7 @@ import { StatusChip } from "../../../components/StatusChip";
 import { ColorField } from "../../../components/stammdaten/ColorField";
 import { ConfirmDialog } from "../../../components/stammdaten/ConfirmDialog";
 import { EmptyState, ErrorState } from "../../../components/stammdaten/EmptyState";
-import { FormDialog } from "../../../components/stammdaten/FormDialog";
+import { FormDialog, FormRow } from "../../../components/stammdaten/FormDialog";
 import { NoticeBanner } from "../../../components/stammdaten/NoticeBanner";
 import { OptionSelect } from "../../../components/stammdaten/OptionSelect";
 import { RowActionsMenu, type RowAction } from "../../../components/stammdaten/RowActionsMenu";
@@ -313,15 +313,23 @@ export default function TerminartenScreen() {
         saving={actions.create.isPending || actions.update.isPending}
         error={formError}
       >
-        <TextField
-          label="Anzeigename"
-          value={displayName}
-          onChangeText={setDisplayName}
-          placeholder="z. B. Feedback-Gespräch"
-          required
-          error={nameError}
-          testID="field-display-name"
-        />
+        <FormRow>
+          <TextField
+            label="Anzeigename"
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="z. B. Feedback-Gespräch"
+            required
+            error={nameError}
+            testID="field-display-name"
+          />
+          <ColorField
+            value={colorHex}
+            onChange={setColorHex}
+            error={colorError}
+            testID="field-color"
+          />
+        </FormRow>
         <OptionSelect
           label="Frequenz-Hinweis"
           value={frequencyPreset}
@@ -345,12 +353,6 @@ export default function TerminartenScreen() {
             testID="field-frequency-custom"
           />
         ) : null}
-        <ColorField
-          value={colorHex}
-          onChange={setColorHex}
-          error={colorError}
-          testID="field-color"
-        />
         <TextField
           label="Beschreibung"
           value={description}

@@ -6,7 +6,7 @@ import { StatusChip } from "../../../components/StatusChip";
 import { ColorField } from "../../../components/stammdaten/ColorField";
 import { ConfirmDialog } from "../../../components/stammdaten/ConfirmDialog";
 import { EmptyState, ErrorState } from "../../../components/stammdaten/EmptyState";
-import { FormDialog } from "../../../components/stammdaten/FormDialog";
+import { FormDialog, FormRow } from "../../../components/stammdaten/FormDialog";
 import { NoticeBanner } from "../../../components/stammdaten/NoticeBanner";
 import { OptionSelect } from "../../../components/stammdaten/OptionSelect";
 import { RowActionsMenu, type RowAction } from "../../../components/stammdaten/RowActionsMenu";
@@ -336,23 +336,25 @@ export default function StandorteScreen() {
             testID="field-key"
           />
         )}
-        <TextField
-          label="Anzeigename"
-          value={displayName}
-          onChangeText={setDisplayName}
-          placeholder="z. B. Berlin"
-          required
-          error={nameError}
-          testID="field-display-name"
-        />
-        <OptionSelect
-          label="Land"
-          value={countryIso}
-          onChange={setCountryIso}
-          options={countryOptions}
-          caption="Ausdrücklich wählen — wird nicht aus dem Namen abgeleitet."
-          testID="field-country"
-        />
+        <FormRow>
+          <TextField
+            label="Anzeigename"
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="z. B. Berlin"
+            required
+            error={nameError}
+            testID="field-display-name"
+          />
+          <OptionSelect
+            label="Land"
+            value={countryIso}
+            onChange={setCountryIso}
+            options={countryOptions}
+            caption="Ausdrücklich wählen — wird nicht aus dem Namen abgeleitet."
+            testID="field-country"
+          />
+        </FormRow>
         <ColorField value={colorHex} onChange={setColorHex} error={colorError} testID="field-color" />
         {dialog?.mode === "edit" ? (
           <SwitchField

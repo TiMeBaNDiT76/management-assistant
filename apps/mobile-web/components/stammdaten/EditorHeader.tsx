@@ -38,8 +38,9 @@ export function EditorHeader({
       >
         <Ionicons name="chevron-back" size={22} color={colors.primary.DEFAULT} />
       </Pressable>
-      <View className="flex-row items-start justify-between">
-        <View className="flex-1 pr-3">
+      {/* page-head stacks below 760px (mockup _palette.css @media rule). */}
+      <View className="flex-col items-start justify-between gap-3 ns:flex-row ns:items-start ns:gap-0">
+        <View className="self-stretch ns:flex-1 ns:pr-3">
           {eyebrow ? (
             <Text className="text-xs font-semibold uppercase" style={{ color: colors.primary.DEFAULT }}>
               {eyebrow}
@@ -52,7 +53,7 @@ export function EditorHeader({
             {subtitle}
           </Text>
         </View>
-        <View className="items-end" style={{ gap: 8 }}>
+        <View className="items-start ns:items-end" style={{ gap: 8 }}>
           {countChip ? <StatusChip label={countChip} /> : null}
           {createLabel && onCreate ? (
             <Pressable

@@ -54,7 +54,7 @@ export function MasterDataTypeCard({ meta }: MasterDataTypeCardProps) {
     <Pressable
       accessibilityRole="button"
       onPress={() => router.push(meta.editorRoute)}
-      className="mb-3 rounded-mudlg border border-divider bg-surface p-4"
+      className="rounded-mudlg border border-divider bg-surface p-4"
       testID={`stammdaten-card-${meta.category}`}
     >
       <View className="mb-3 flex-row items-center justify-between">
