@@ -81,10 +81,11 @@ jobs:
             --set-env-vars "NODE_ENV=production" \
             --set-env-vars "DB_PATH=/data/mgmt.db" \
             --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" \
-            --set-env-vars "LITESTREAM_BUCKET=${{ secrets.GCP_PROJECT_ID }}-db-test" \
+            --set-env-vars "LITESTREAM_BUCKET=${{ secrets.GCP_PROJECT_ID }}-litestream-test" \
             --set-env-vars "LITESTREAM_ENDPOINT=https://storage.googleapis.com" \
             --set-env-vars "GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}" \
-            --set-env-vars "GOOGLE_CLOUD_LOCATION=${{ vars.GCP_VERTEX_LOCATION || 'us-central1' }}"
+            --set-env-vars "GOOGLE_CLOUD_LOCATION=${{ vars.GCP_VERTEX_LOCATION || 'us-central1' }}" \
+            --set-env-vars "ALLOWED_ORIGINS=https://storage.googleapis.com,http://localhost:8081,http://localhost:19006"
 
   deploy-web:
     name: Deploy web-test (static export)

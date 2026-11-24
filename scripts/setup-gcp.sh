@@ -67,6 +67,24 @@ for BUCKET in "$BUCKET_TEST" "$BUCKET_PROD"; do
     --role="roles/storage.objectAdmin"
 done
 
+echo ">>> 3b. Erstelle Web-Buckets für statisches Expo Web Export (Test & Prod)..."
+for WEB_BUCKET in "${GCP_PROJECT_ID}-web-test" "${GCP_PROJECT_ID}-web-prod"; do
+  gcloud storage buckets create "gs://${WEB_BUCKET}" \
+    --location="$REGION" \
+    --uniform-bucket-level-access || true
+
+  # Statisches Hosting: index.html als Start- und Fehlerseite
+  gcloud storage buckets update "gs://${WEB_BUCKET}" \
+    --web-main-page-suffix=index.html \
+    --web-error-page=index.html
+
+  # Öffentlicher Lesezugriff für statisches Hosting
+  gcloud storage buckets add-iam-policy-binding "gs://${WEB_BUCKET}" \
+    --member="allUsers" \
+    --role="roles/storage.objectViewer" \
+    --quiet
+done
+
 echo ">>> 4. Workload Identity Federation für GitHub Actions (Keyless Auth)..."
 PROJECT_NUMBER=$(gcloud projects describe "$GCP_PROJECT_ID" --format='value(projectNumber)')
 
