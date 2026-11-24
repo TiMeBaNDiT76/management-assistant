@@ -1,6 +1,7 @@
 name: Deploy PROD
 
-# main branch -> Cloud Run `api-prod` + web bucket `web-prod`.
+# main branch -> Cloud Run `api-prod`, which serves BOTH the API
+# (tRPC/health/docs) and the exported web app (SPA fallback).
 # PROD environment of the single GCP project. Merge via PR only.
 
 on:
@@ -26,12 +27,43 @@ jobs:
     uses: ./.github/workflows/qa-gate.yml
 
   build-and-push-api:
-    name: Build & push API image
+    name: Build & push API image (incl. web bundle)
     needs: qa-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The web app is served by the API container (single origin, SPA
+      # fallback) — build it here and stage it where the Dockerfile COPYs
+      # it from. EXPO_PUBLIC_* vars are embedded into the Expo bundle at
+      # build time. No EXPO_PUBLIC_BASE_URL: same-origin serving from "/".
+      - name: Build web bundle into image context
+        run: |
+          pnpm --filter @mgmt/mobile-web build
+          rm -rf apps/api/web-dist
+          cp -R apps/mobile-web/dist apps/api/web-dist
+        env:
+          # Firebase web config is embedded into the Expo bundle at build
+          # time (EXPO_PUBLIC_* vars). Secrets/vars only — no values here.
+          # No dev bypass in PROD: real Firebase Auth sessions only.
+          EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
+          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
+          EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL_PROD || vars.EXPO_PUBLIC_API_URL }}
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
@@ -55,7 +87,7 @@ jobs:
         run: docker push "$IMAGE"
 
   deploy-api:
-    name: Deploy api-prod (Cloud Run)
+    name: Deploy api-prod (Cloud Run, serves API + web)
     needs: build-and-push-api
     runs-on: ubuntu-latest
     steps:
@@ -81,84 +113,3 @@ jobs:
             --allow-unauthenticated \
             --service-account "${{ secrets.GCP_RUNTIME_SERVICE_ACCOUNT }}" \
             --set-env-vars "^@^NODE_ENV=production@DB_PATH=/data/mgmt.db@FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}@LITESTREAM_BUCKET=${{ secrets.GCP_PROJECT_ID }}-litestream-prod@LITESTREAM_ENDPOINT=https://storage.googleapis.com@GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}@GOOGLE_CLOUD_LOCATION=${{ vars.GCP_VERTEX_LOCATION || 'us-central1' }}@ALLOWED_ORIGINS=https://storage.googleapis.com,http://localhost:8081,http://localhost:19006"
-
-  deploy-web:
-    name: Deploy web-prod (static export)
-    needs: qa-gate
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Export web bundle
-        run: pnpm --filter @mgmt/mobile-web build
-        env:
-          # Firebase web config is embedded into the Expo bundle at build time
-          # (EXPO_PUBLIC_* vars). Secrets/vars only — no values in this repo.
-          # No dev bypass in PROD: real Firebase Auth sessions only.
-          EXPO_PUBLIC_FIREBASE_API_KEY: ${{ secrets.EXPO_PUBLIC_FIREBASE_API_KEY }}
-          EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN }}
-          EXPO_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_PROJECT_ID }}
-          EXPO_PUBLIC_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
-          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
-          # Static export is served from the bucket as first path segment
-          # (storage.googleapis.com/<bucket>/...). Assets/links must be
-          # prefixed accordingly (experiments.baseUrl).
-          EXPO_PUBLIC_BASE_URL: /${{ secrets.GCP_PROJECT_ID }}-web-prod
-
-      - name: Authenticate to GCP
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_DEPLOY_SERVICE_ACCOUNT }}
-
-      - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v2
-
-      # GCS website configuration on the XML API endpoint: GET / serves
-      # index.html and any unresolvable key falls back to the SPA (deep-link
-      # refreshes like /people/<uuid> boot the app instead of returning the
-      # bucket listing XML / NoSuchKey). Idempotent on every deploy.
-      - name: Configure bucket website fallback
-        run: |
-          gcloud storage buckets update "gs://${{ secrets.GCP_PROJECT_ID }}-web-prod/" \
-            --web-main-page-suffix=index.html \
-            --web-error-page=index.html
-
-      - name: Upload to web bucket
-        run: |
-          gcloud storage rsync --recursive --quiet \
-            --cache-control="public, max-age=0, must-revalidate" \
-            "apps/mobile-web/dist" \
-            "gs://${{ secrets.GCP_PROJECT_ID }}-web-prod/"
-
-      # GCS serves objects at exact keys only (no rewrite rules on the
-      # storage.googleapis.com endpoint). The static export writes
-      # <route>.html files, but the SPA addresses /<route> — so every route
-      # HTML is additionally uploaded under its extensionless key. Dynamic
-      # segments ([id]) cannot be prerendered per-key; refreshing such a
-      # deep link still 404s (client-side navigation works).
-      - name: Upload extensionless route fallbacks
-        run: |
-          find apps/mobile-web/dist -name '*.html' | while read -r f; do
-            rel="${f#apps/mobile-web/dist/}"
-            case "$rel" in
-              *"("*|"_sitemap.html"|"+not-found.html") continue ;;
-            esac
-            gcloud storage cp --quiet \
-              --cache-control="public, max-age=0, must-revalidate" \
-              "$f" \
-              "gs://${{ secrets.GCP_PROJECT_ID }}-web-prod/${rel%.html}"
-          done

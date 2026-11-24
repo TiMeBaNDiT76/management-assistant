@@ -34,13 +34,19 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY --from=build /out ./
+# Static web bundle (Expo static export) served by the API at `/` via
+# WEB_DIST_PATH. CI stages the real export into apps/api/web-dist BEFORE the
+# image build (overwriting the committed placeholder); the placeholder
+# index.html in git keeps standalone `docker build` runs green.
+COPY apps/api/web-dist /app/web
 COPY apps/api/litestream.yml /etc/litestream.yml
 COPY apps/api/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENV NODE_ENV=production \
     DB_PATH=/data/mgmt.db \
-    PORT=8080
+    PORT=8080 \
+    WEB_DIST_PATH=/app/web
 
 USER app
 EXPOSE 8080

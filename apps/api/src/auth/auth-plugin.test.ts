@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { DEV_USER_ID } from "./auth-plugin";
 import { createTestApp, createTestClient } from "../testing/test-utils";
@@ -44,6 +47,30 @@ describe("auth plugin", () => {
     });
     expect(response.statusCode).toBe(401);
     await app.close();
+  });
+
+  it("treats SPA/static paths as public when the web app is served", async () => {
+    // Simulates the API serving the exported web app (webDistPath staged):
+    // browser navigations carry no bearer token, but /trpc stays protected.
+    const webDist = mkdtempSync(path.join(tmpdir(), "auth-web-dist-"));
+    writeFileSync(path.join(webDist, "index.html"), "<!doctype html><html><body>spa</body></html>");
+    try {
+      const app = await createTestApp({
+        devBypassAuth: false,
+        firebaseProjectId: "test-project",
+        webDistPath: webDist,
+      });
+
+      const login = await app.inject({ method: "GET", url: "/login" });
+      expect(login.statusCode).not.toBe(401);
+
+      const trpc = await app.inject({ method: "GET", url: "/trpc/employees.list" });
+      expect(trpc.statusCode).toBe(401);
+
+      await app.close();
+    } finally {
+      rmSync(webDist, { recursive: true, force: true });
+    }
   });
 
   it("documents the fixed dev tenant id", () => {
