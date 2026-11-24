@@ -3,8 +3,6 @@
 dbs:
   - path: ${DB_PATH}
     replicas:
-      - type: s3
+      - type: gs
         bucket: ${LITESTREAM_BUCKET}
         path: mgmt
-        endpoint: ${LITESTREAM_ENDPOINT}
-        region: auto

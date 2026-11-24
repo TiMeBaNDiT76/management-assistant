@@ -69,6 +69,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       # SQLite on Cloud Run: exactly one instance, Litestream-wrapped writes.
+      # NOTE: single --set-env-vars with ^@^ delimiter (commas inside values).
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy "${{ env.SERVICE }}" \
@@ -78,14 +79,7 @@ jobs:
             --max-instances=1 \
             --concurrency=80 \
             --service-account "${{ secrets.GCP_RUNTIME_SERVICE_ACCOUNT }}" \
-            --set-env-vars "NODE_ENV=production" \
-            --set-env-vars "DB_PATH=/data/mgmt.db" \
-            --set-env-vars "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" \
-            --set-env-vars "LITESTREAM_BUCKET=${{ secrets.GCP_PROJECT_ID }}-litestream-test" \
-            --set-env-vars "LITESTREAM_ENDPOINT=https://storage.googleapis.com" \
-            --set-env-vars "GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}" \
-            --set-env-vars "GOOGLE_CLOUD_LOCATION=${{ vars.GCP_VERTEX_LOCATION || 'us-central1' }}" \
-            --set-env-vars "ALLOWED_ORIGINS=https://storage.googleapis.com,http://localhost:8081,http://localhost:19006"
+            --set-env-vars "^@^NODE_ENV=production@DB_PATH=/data/mgmt.db@FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}@LITESTREAM_BUCKET=${{ secrets.GCP_PROJECT_ID }}-litestream-test@LITESTREAM_ENDPOINT=https://storage.googleapis.com@GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}@GOOGLE_CLOUD_LOCATION=${{ vars.GCP_VERTEX_LOCATION || 'us-central1' }}@ALLOWED_ORIGINS=https://storage.googleapis.com,http://localhost:8081,http://localhost:19006"
 
   deploy-web:
     name: Deploy web-test (static export)

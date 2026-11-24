@@ -83,6 +83,12 @@ for WEB_BUCKET in "${GCP_PROJECT_ID}-web-test" "${GCP_PROJECT_ID}-web-prod"; do
     --member="allUsers" \
     --role="roles/storage.objectViewer" \
     --quiet
+
+  # Deploy-SA: Buckets.get (rsync-Prüfung) + Objekt-Upload/Update
+  gcloud storage buckets add-iam-policy-binding "gs://${WEB_BUCKET}" \
+    --member="serviceAccount:${SA_EMAIL}" \
+    --role="roles/storage.admin" \
+    --quiet
 done
 
 echo ">>> 4. Workload Identity Federation für GitHub Actions (Keyless Auth)..."
