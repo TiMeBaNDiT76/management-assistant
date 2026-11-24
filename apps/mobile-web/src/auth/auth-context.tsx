@@ -5,8 +5,8 @@
  * - Dev bypass (`EXPO_PUBLIC_DEV_AUTH_BYPASS=true`): instantly signs in the
  *   fixed local dev user (`dev-local-user`) — the same identity the API
  *   expects when `DEV_BYPASS_AUTH=true`. No Firebase project required.
- * - Firebase Auth: real email/password session via `getFirebaseAuth()`
- *   (one-time console setup, see `docs/firebase-setup.md`).
+ * - Firebase Auth: real email/password or Google session via
+ *   `getFirebaseAuth()` (one-time console setup, see `docs/firebase-setup.md`).
  */
 import {
   createContext,
@@ -17,10 +17,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { Platform } from "react-native";
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseSignOut,
   type Auth,
   type User,
@@ -44,6 +47,8 @@ export interface AuthContextValue {
   signIn: (email: string, password: string) => Promise<void>;
   /** Registers a new account and signs in (instant in dev bypass). */
   signUp: (email: string, password: string) => Promise<void>;
+  /** Signs in with Google on web (popup); unavailable on native shells. */
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -107,6 +112,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await createUserWithEmailAndPassword(requireFirebaseAuth(), email, password);
   }, []);
 
+  const signInWithGoogle = useCallback(async () => {
+    if (Platform.OS !== "web") {
+      // Native shells are not deployed yet — no expo-auth-session wiring.
+      throw new Error("Google-Anmeldung ist auf Web verfügbar.");
+    }
+    if (isDevBypass()) {
+      setStatus("signedIn");
+      setUser({ id: DEV_USER_ID, email: null });
+      return;
+    }
+    const provider = new GoogleAuthProvider();
+    provider.addScope("email");
+    provider.addScope("profile");
+    await signInWithPopup(requireFirebaseAuth(), provider);
+  }, []);
+
   const signOut = useCallback(async () => {
     const auth = getFirebaseAuth();
     if (auth) await firebaseSignOut(auth);
@@ -115,8 +136,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, signIn, signUp, signOut }),
-    [status, user, signIn, signUp, signOut],
+    () => ({ status, user, signIn, signUp, signInWithGoogle, signOut }),
+    [status, user, signIn, signUp, signInWithGoogle, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
