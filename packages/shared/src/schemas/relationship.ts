@@ -1,8 +1,14 @@
 import { z } from "zod";
-import { EMPLOYEE_RELATIONSHIP_TYPES } from "../constants";
+import { RELATIONSHIP_TYPE_SEED_KEYS } from "../master-data";
 import { paginationSchema } from "./common";
 
-export const relationshipTypeSchema = z.enum(EMPLOYEE_RELATIONSHIP_TYPES);
+/**
+ * Relationship type — validated against the machine `key`s of the
+ * `relationship_type` master-data seed category (single source of truth;
+ * the seed keys mirror the legacy `EMPLOYEE_RELATIONSHIP_TYPES` enum, so the
+ * accepted wire values are unchanged).
+ */
+export const relationshipTypeSchema = z.enum(RELATIONSHIP_TYPE_SEED_KEYS);
 
 export const relationshipCreateSchema = z
   .object({

@@ -1,8 +1,14 @@
 import { z } from "zod";
-import { ACTION_ITEM_STATUSES } from "../constants";
+import { TASK_STATUS_SEED_KEYS } from "../master-data";
 import { paginationSchema } from "./common";
 
-export const actionItemStatusSchema = z.enum(ACTION_ITEM_STATUSES);
+/**
+ * Action item status — validated against the machine `key`s of the
+ * `task_status` master-data seed category (single source of truth; the seed
+ * keys mirror the legacy `ACTION_ITEM_STATUSES` enum, so the accepted wire
+ * values are unchanged).
+ */
+export const actionItemStatusSchema = z.enum(TASK_STATUS_SEED_KEYS);
 
 export const actionItemCreateSchema = z.object({
   title: z.string().min(1).max(200),

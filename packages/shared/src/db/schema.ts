@@ -46,7 +46,7 @@ export const employeeRelationships = sqliteTable(
     toEmployeeId: text("to_employee_id")
       .notNull()
       .references(() => employees.id, { onDelete: "cascade" }),
-    // One of EMPLOYEE_RELATIONSHIP_TYPES
+    // One of the `relationship_type` master-data seed keys (== EMPLOYEE_RELATIONSHIP_TYPES)
     type: text("type").notNull(),
     notes: text("notes"),
     createdAt: text("created_at")
@@ -69,7 +69,7 @@ export const conversations = sqliteTable(
       .notNull()
       .references(() => employees.id, { onDelete: "cascade" }),
     scheduledAt: text("scheduled_at").notNull(), // ISO datetime
-    // One of CONVERSATION_TYPES
+    // One of the `appointment_type` master-data seed keys (== CONVERSATION_TYPES)
     type: text("type").notNull().default("one_on_one"),
     // One of CONVERSATION_STATUSES
     status: text("status").notNull().default("planned"),
@@ -101,7 +101,7 @@ export const actionItems = sqliteTable(
     employeeId: text("employee_id").references(() => employees.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     description: text("description"),
-    // One of ACTION_ITEM_STATUSES
+    // One of the `task_status` master-data seed keys (== ACTION_ITEM_STATUSES)
     status: text("status").notNull().default("open"),
     dueDate: text("due_date"), // ISO date (YYYY-MM-DD)
     createdAt: text("created_at")

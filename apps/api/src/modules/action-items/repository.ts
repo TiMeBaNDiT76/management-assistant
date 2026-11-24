@@ -1,6 +1,10 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
 import type { AppDatabase } from "@mgmt/shared";
-import { actionItems } from "@mgmt/shared";
+import {
+  ACTION_ITEM_DEFAULT_STATUS,
+  ACTION_ITEM_OPEN_STATUSES,
+  actionItems,
+} from "@mgmt/shared";
 import type { ActionItem, ListActionItemsInput } from "@mgmt/shared";
 
 export interface CreateActionItemData {
@@ -29,7 +33,7 @@ export class ActionItemRepository {
         employeeId: data.employeeId,
         conversationId: data.conversationId,
         dueDate: data.dueDate,
-        status: data.status ?? "open",
+        status: data.status ?? ACTION_ITEM_DEFAULT_STATUS,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })
@@ -46,7 +50,7 @@ export class ActionItemRepository {
       conditions.push(eq(actionItems.conversationId, options.conversationId));
     }
     if (options.openOnly) {
-      conditions.push(inArray(actionItems.status, ["open", "in_progress"]));
+      conditions.push(inArray(actionItems.status, [...ACTION_ITEM_OPEN_STATUSES]));
     }
     return this.db
       .select()
