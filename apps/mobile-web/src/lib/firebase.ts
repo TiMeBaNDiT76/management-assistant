@@ -16,7 +16,11 @@ import type {
   ReactNativeAsyncStorage,
 } from "firebase/auth";
 
-const { browserLocalPersistence, initializeAuth } = firebaseAuth;
+const {
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+  initializeAuth,
+} = firebaseAuth;
 
 /**
  * `getReactNativePersistence` only ships with the react-native entry of
@@ -60,6 +64,11 @@ let auth: Auth | null = null;
  * `browserLocalPersistence` (localStorage) on web — where the react-native
  * entry (and thus `getReactNativePersistence`) does not exist — and
  * AsyncStorage-backed persistence on native platforms.
+ *
+ * On web the browser popup/redirect resolver is attached explicitly:
+ * unlike `getAuth()`, `initializeAuth()` leaves `_popupRedirectResolver`
+ * unset, and `signInWithPopup` (Google sign-in) hard-asserts on it with
+ * `auth/argument-error` when missing.
  */
 export function getFirebaseAuth(): Auth | null {
   if (auth) return auth;
@@ -71,6 +80,7 @@ export function getFirebaseAuth(): Auth | null {
       Platform.OS === "web"
         ? browserLocalPersistence
         : getReactNativePersistence(AsyncStorage),
+    ...(Platform.OS === "web" && { popupRedirectResolver: browserPopupRedirectResolver }),
   });
   return auth;
 }

@@ -39,6 +39,7 @@ jest.mock("firebase/app", () => ({
 
 jest.mock("firebase/auth", () => ({
   browserLocalPersistence: { type: "LOCAL" },
+  browserPopupRedirectResolver: { type: "POPUP" },
   initializeAuth: jest.fn(() => "auth-instance"),
   getReactNativePersistence: jest.fn(() => ({ type: "RN" })),
 }));
@@ -55,6 +56,7 @@ const ENV_KEYS = Object.keys(TEST_CONFIG) as Array<keyof typeof TEST_CONFIG>;
 
 interface AuthMocks {
   browserLocalPersistence: Persistence;
+  browserPopupRedirectResolver: { type: "POPUP" };
   initializeAuth: jest.Mock;
   getReactNativePersistence: jest.Mock;
 }
@@ -168,9 +170,14 @@ describe("firebase auth wiring", () => {
     expect(auth).toBe("auth-instance");
     expect(authMocks.initializeAuth).toHaveBeenCalledTimes(1);
     const options = authMocks.initializeAuth.mock.calls[0]?.[1] as
-      | { persistence: Persistence }
+      | { persistence: Persistence; popupRedirectResolver?: unknown }
       | undefined;
     expect(options?.persistence).toBe(authMocks.browserLocalPersistence);
+    // signInWithPopup hard-asserts on _popupRedirectResolver with
+    // auth/argument-error — initializeAuth never attaches it by default.
+    expect(options?.popupRedirectResolver).toBe(
+      authMocks.browserPopupRedirectResolver,
+    );
     expect(authMocks.getReactNativePersistence).not.toHaveBeenCalled();
   });
 
