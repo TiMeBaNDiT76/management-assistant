@@ -120,6 +120,16 @@ jobs:
           # enabled via a repository variable (defaults to disabled).
           EXPO_PUBLIC_DEV_AUTH_BYPASS: ${{ vars.EXPO_PUBLIC_DEV_AUTH_BYPASS || '' }}
 
+      # GCS website configuration on the XML API endpoint: GET / serves
+      # index.html and any unresolvable key falls back to the SPA (deep-link
+      # refreshes like /people/<uuid> boot the app instead of returning the
+      # bucket listing XML / NoSuchKey). Idempotent on every deploy.
+      - name: Configure bucket website fallback
+        run: |
+          gcloud storage buckets update "gs://${{ secrets.GCP_PROJECT_ID }}-web-test/" \
+            --web-main-page-suffix=index.html \
+            --web-error-page=index.html
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:

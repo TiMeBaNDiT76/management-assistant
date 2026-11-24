@@ -118,6 +118,16 @@ jobs:
           # prefixed accordingly (experiments.baseUrl).
           EXPO_PUBLIC_BASE_URL: /${{ secrets.GCP_PROJECT_ID }}-web-prod
 
+      # GCS website configuration on the XML API endpoint: GET / serves
+      # index.html and any unresolvable key falls back to the SPA (deep-link
+      # refreshes like /people/<uuid> boot the app instead of returning the
+      # bucket listing XML / NoSuchKey). Idempotent on every deploy.
+      - name: Configure bucket website fallback
+        run: |
+          gcloud storage buckets update "gs://${{ secrets.GCP_PROJECT_ID }}-web-prod/" \
+            --web-main-page-suffix=index.html \
+            --web-error-page=index.html
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
