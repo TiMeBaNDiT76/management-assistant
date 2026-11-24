@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 import { describe, expect, it } from "@jest/globals";
-import TasksScreen from "./tasks";
+import TasksScreen from "../../app/(tabs)/tasks";
 
 describe("TasksScreen", () => {
   it("renders the header and sample action items", async () => {

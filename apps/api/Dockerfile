@@ -17,7 +17,7 @@ COPY . .
 RUN pnpm install --frozen-lockfile \
   && pnpm --filter @mgmt/shared build \
   && pnpm --filter @mgmt/api build \
-  && pnpm --filter @mgmt/api --prod deploy /out
+  && pnpm --filter @mgmt/api --prod --legacy deploy /out
 
 # --- Runtime: minimal image with litestream + node server ----------------------
 FROM node:22-bookworm-slim AS runtime

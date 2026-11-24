@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 import { describe, expect, it } from "@jest/globals";
-import ConversationsScreen from "./conversations";
+import ConversationsScreen from "../../app/(tabs)/conversations";
 
 describe("ConversationsScreen", () => {
   it("renders the header and sample conversations", async () => {

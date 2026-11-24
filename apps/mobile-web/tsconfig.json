@@ -4,6 +4,6 @@
     "strict": true,
     "types": ["jest", "node", "nativewind/types"]
   },
-  "include": ["app", "components", "src", "global.d.ts"],
+  "include": ["app", "components", "src", "__tests__", "global.d.ts"],
   "exclude": ["node_modules", ".expo", "dist"]
 }
